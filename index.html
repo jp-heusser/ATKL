@@ -1,85 +1,38 @@
 <!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
-<meta name="description" content="ATKL Records: sello discográfico y productora de eventos de Techno, Industrial y Hard Techno. Accede a música, eventos, comunidad y contacto.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ATKL Records | Official Access">
-<meta property="og:description" content="El universo ATKL. Techno · Industrial · Hard Techno.">
-<title>ATKL Records — Official Access</title>
-<link rel="icon" href="assets/logo-atkl-original-blanco.png" type="image/png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"}}</script>
-</head>
-<body>
-<div class="noise" aria-hidden="true"></div>
-<div class="site-bg" aria-hidden="true"></div>
-<div class="page-shell">
-  <header class="topbar" aria-label="Encabezado">
-    <a class="wordmark" href="#inicio" aria-label="ATKL Records, ir al inicio">ATKL<span class="wordmark-stroke">/</span><small>RECORDS</small></a>
-    <div class="top-status"><span class="status-led"></span><span>INDEPENDENT TECHNO CULTURE</span></div>
-    <a class="header-social" href="https://www.instagram.com/atkl.records/" target="_blank" rel="noopener noreferrer" aria-label="Instagram oficial de ATKL">@ATKL.RECORDS <span aria-hidden="true">↗</span></a>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <title>ATKL Records</title>
+    <meta name="description" content="ATKL Records: label and collective of Techno and Hard Techno, Chilean based." />
 
-  <main id="inicio">
-    <section class="hero" aria-labelledby="hero-heading">
-      <div class="frame-accent frame-accent-l" aria-hidden="true"></div>
-      <div class="frame-accent frame-accent-r" aria-hidden="true"></div>
-      <div class="hero-content">
-        <div class="eyebrow"><span class="eyebrow-line"></span> OFFICIAL ACCESS / 001</div>
-        <h1 id="hero-heading">THIS IS <span>ATKL.</span></h1>
-        <p class="hero-lead">Sello discográfico <span class="plus">+</span> productora de eventos.</p>
-        <p class="hero-description">Nuestra frecuencia. Nuestros lanzamientos.<br>Tu acceso directo a la comunidad.</p>
-        <div class="genre-pills"><span>TECHNO</span><span>INDUSTRIAL</span><span>HARD TECHNO</span></div>
-        <a class="hero-cta" href="#enlaces">EXPLORAR ENLACES <span aria-hidden="true">↓</span></a>
-      </div>
-      <div class="hero-media">
-        <div class="orbit-ring orbit-ring-one" aria-hidden="true"></div><div class="orbit-ring orbit-ring-two" aria-hidden="true"></div>
-        <div class="hero-glow" aria-hidden="true"></div>
-        <div id="logo-stage" class="logo-stage" role="img" aria-label="Logo original de ATKL con efecto tridimensional interactivo. Arrastra para rotar.">
-          <div id="logo-css" class="logo-css" aria-hidden="true">
-            <img class="layer layer-6" src="assets/logo-atkl-white-trim.png" alt="">
-            <img class="layer layer-5" src="assets/logo-atkl-white-trim.png" alt="">
-            <img class="layer layer-4" src="assets/logo-atkl-white-trim.png" alt="">
-            <img class="layer layer-3" src="assets/logo-atkl-white-trim.png" alt="">
-            <img class="layer layer-2" src="assets/logo-atkl-white-trim.png" alt="">
-            <img class="layer layer-1" src="assets/logo-atkl-white-trim.png" alt="">
-            <img class="layer layer-front" src="assets/logo-atkl-white-trim.png" alt="">
-          </div>
-          <div id="three-root" aria-hidden="true"></div>
-        </div>
-        <div class="stage-controls"><span>◉ &nbsp; INTERACTIVE 3D LOGO</span><button type="button" id="reset-view" aria-label="Restablecer vista del logo">RESET VIEW ↺</button></div>
-      </div>
-      <div class="hero-footer"><span>CL / EST. 2023</span><span>SCROLL TO CONNECT <span aria-hidden="true">↓</span></span></div>
-    </section>
+    <!-- Vista previa al compartir (WhatsApp, Instagram, X…). Cambia og:url cuando tengas dominio. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ATKL Records" />
+    <meta property="og:title" content="ATKL Records" />
+    <meta property="og:description" content="Label and collective of Techno and Hard Techno, Chilean based." />
+    <meta property="og:url" content="https://sinisterhd.github.io/ATKL-LINKS/" />
+    <meta property="og:image" content="https://sinisterhd.github.io/ATKL-LINKS/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <section class="links-section" id="enlaces" aria-labelledby="links-heading">
-      <div class="section-title"><div><span class="section-kicker">02 / CONNECT</span><h2 id="links-heading">ENTRA EN LA <span>FRECUENCIA.</span></h2></div><span class="section-aside">PLATAFORMAS OFICIALES <span aria-hidden="true">↘</span></span></div>
-      <nav id="links-list" class="links-grid" aria-label="Enlaces oficiales a plataformas de ATKL Records"></nav>
-      <noscript><p class="no-js">Activa JavaScript para ver todos los accesos, o entra a <a href="https://www.instagram.com/atkl.records/">Instagram oficial de ATKL</a>.</p></noscript>
-    </section>
-
-    <section class="events-section" aria-labelledby="events-heading">
-      <div class="section-title"><div><span class="section-kicker">03 / EVENTS</span><h2 id="events-heading">LA NOCHE <span>CONTINÚA.</span></h2></div></div>
-      <div id="featured-event" class="featured-event" hidden></div>
-      <div id="events-default" class="events-default"><span class="event-indicator"><i></i> PRÓXIMOS EVENTOS</span><p>Las novedades se anuncian en nuestros canales oficiales.</p><a href="https://www.instagram.com/atkl.records/" rel="noopener noreferrer" target="_blank">MANTENTE CONECTADO <span aria-hidden="true">↗</span></a></div>
-    </section>
-
-    <section class="footer-cta" aria-labelledby="footer-title">
-      <div><span class="section-kicker">04 / CONTACT</span><h2 id="footer-title">KEEP IT <span>UNDERGROUND.</span></h2><p>Colaboraciones, música y propuestas: contáctanos por Instagram.</p></div>
-      <a href="https://www.instagram.com/atkl.records/" rel="noopener noreferrer" target="_blank" class="footer-button">ESCRIBIR A ATKL <span aria-hidden="true">↗</span></a>
-    </section>
-  </main>
-  <footer class="footer"><div><strong>ATKL RECORDS</strong> <span>© <span id="year">2026</span></span></div><span>MADE FOR THE UNDERGROUND / CHILE</span><button type="button" id="share-site">COMPARTIR <span aria-hidden="true">↗</span></button></footer>
-</div>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/config.js"></script>
-<script src="js/main.js"></script>
-<script type="module" src="js/three-logo.js"></script>
-</body>
+    <link rel="icon" href="./favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preload" href="./logo-atkl.webp" as="image" type="image/webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body style="background:#000">
+    <div id="root"></div>
+    <noscript>
+      <p style="padding:24px;font-family:sans-serif;color:#eee;background:#080808">
+        Activa JavaScript para ver todos los accesos, o entra a
+        <a style="color:#ff6a76" href="https://www.instagram.com/atkl.records/">Instagram oficial de ATKL</a>.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

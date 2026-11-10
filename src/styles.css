@@ -1,0 +1,500 @@
+:root {
+  color-scheme: dark;
+  --bg: #000;
+  --fg: #f2f2f2;
+  --mute: #a3a3a3;
+  --line: #2e2e2e;
+  --hover: #0f0f0f;
+  --accent: #ee2d3d;
+  --font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --display: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: var(--bg);
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--fg);
+  font: 15px/1.45 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:focus-visible,
+button:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 3px;
+}
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+.page {
+  width: 100%;
+  max-width: 480px;
+  padding: 56px 20px 32px;
+  animation: in 0.35s ease both;
+}
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ---------- Home ---------- */
+.label-head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.logo {
+  width: min(180px, 52vw);
+  height: auto;
+  display: block;
+  margin: 0 auto 16px;
+}
+.label-name {
+  font: 800 30px/1 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.label-bio {
+  margin: 8px auto 0;
+  max-width: 34ch;
+  font-size: 14px;
+  color: var(--mute);
+}
+.label-socials {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+}
+.label-socials a {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--mute);
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+.label-socials a:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+
+/* Artistas: desplegable cerrado al final */
+.artists-box {
+  margin-top: 28px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.artists-box summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mute);
+  transition: color 0.15s;
+}
+.artists-box summary::-webkit-details-marker {
+  display: none;
+}
+.artists-box summary:hover,
+.artists-box[open] summary {
+  color: var(--fg);
+}
+.summary-right {
+  display: flex;
+  gap: 12px;
+}
+.chev {
+  transition: transform 0.2s;
+}
+.artists-box[open] .chev {
+  transform: rotate(180deg);
+}
+.artists-box .artist-list {
+  border-top: 1px solid var(--line);
+  padding: 0 12px;
+}
+.artists-box .artist-list li:last-child .artist-row {
+  border-bottom: 0;
+}
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+.artist-list {
+  list-style: none;
+}
+.artist-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s, padding 0.15s;
+}
+.artist-row:hover {
+  background: var(--hover);
+  padding-left: 10px;
+}
+.artist-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.artist-name {
+  font: 700 19px/1.1 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.artist-meta {
+  font-size: 13px;
+  color: var(--mute);
+}
+.row-arrow {
+  color: var(--mute);
+  transition: color 0.15s, transform 0.15s;
+}
+.artist-row:hover .row-arrow {
+  color: var(--accent);
+  transform: translateX(3px);
+}
+
+/* ---------- Avatar ---------- */
+.avatar {
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #111;
+  border: 1px solid var(--line);
+}
+.avatar-initials {
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--mute);
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Artista ---------- */
+.back {
+  margin-bottom: 36px;
+}
+.back a {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mute);
+  transition: color 0.15s;
+}
+.back a:hover {
+  color: var(--fg);
+}
+.artist-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+.artist-head .avatar {
+  margin-bottom: 10px;
+}
+.artist-title {
+  font: 800 40px/1 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.link-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.link-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.link-btn:hover {
+  border-color: #3a3a3a;
+  background: var(--hover);
+}
+.link-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.link-name {
+  font-weight: 600;
+}
+.link-detail {
+  font-size: 12px;
+  color: var(--mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link-arrow {
+  color: var(--mute);
+  transition: color 0.15s;
+}
+.link-btn:hover .link-arrow {
+  color: var(--accent);
+}
+
+.pf-icon {
+  flex: none;
+  display: block;
+}
+.pf-badge {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  font: 700 10px/1 var(--font);
+  letter-spacing: -0.02em;
+}
+.label-socials .pf-badge {
+  width: 19px;
+  height: 19px;
+}
+
+.copy-btn {
+  display: block;
+  margin: 24px auto 0;
+  background: none;
+  border: 0;
+  color: var(--mute);
+  font: 12px var(--font);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 6px;
+}
+.copy-btn:hover {
+  color: var(--fg);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  margin-top: auto;
+  padding: 32px 20px 40px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #555;
+}
+.site-footer a:hover {
+  color: var(--fg);
+}
+
+/* ============================================================
+   Estilo llamativo: rayos, contraste y efectos
+   ============================================================ */
+.particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+/* halo rojo arriba + viñeta para que el texto siempre se lea */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 38% at 50% 0%, rgba(238, 45, 61, 0.26), transparent 70%),
+    radial-gradient(ellipse 90% 60% at 50% 55%, rgba(0, 0, 0, 0.55), transparent 80%);
+}
+.page,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Logo con resplandor y glitch */
+.logo-wrap {
+  position: relative;
+  width: min(200px, 56vw);
+  margin: 0 auto 16px;
+}
+.logo-wrap .logo {
+  width: 100%;
+  margin: 0;
+  filter: drop-shadow(0 0 22px rgba(238, 45, 61, 0.55));
+}
+.logo-ghost {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 0 var(--accent)) brightness(0.6) sepia(1) saturate(9) hue-rotate(-50deg) !important;
+  animation: glitch 5.5s steps(1) infinite;
+  pointer-events: none;
+}
+@keyframes glitch {
+  0%, 91%, 100% { opacity: 0; transform: none; }
+  92% { opacity: 0.9; transform: translate(-5px, 2px); clip-path: inset(10% 0 55% 0); }
+  94% { opacity: 0.9; transform: translate(6px, -2px); clip-path: inset(50% 0 15% 0); }
+  96% { opacity: 0.8; transform: translate(-3px, 1px); clip-path: inset(30% 0 35% 0); }
+  98% { opacity: 0; }
+}
+
+.label-name {
+  font-size: 38px;
+  text-shadow: 0 0 24px rgba(238, 45, 61, 0.45);
+}
+.label-bio {
+  color: #d0d0d0;
+}
+.label-socials a {
+  color: var(--fg);
+  border: 1px solid var(--line);
+}
+.label-socials a:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 18px rgba(238, 45, 61, 0.6);
+  transform: translateY(-2px);
+}
+.label-socials a {
+  transition: color 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+/* Botones: alto contraste. Borde claro, barra roja, y al pasar el cursor se invierten a blanco. */
+.rise {
+  animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+}
+.link-btn {
+  position: relative;
+  overflow: hidden;
+  background: rgba(8, 8, 8, 0.82);
+  border: 1px solid #4a4a4a;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  backdrop-filter: blur(3px);
+  transition: color 0.18s, background 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+/* brillo rojo que sigue al cursor */
+.link-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), rgba(238, 45, 61, 0.45), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.link-btn > * {
+  position: relative;
+}
+.link-btn:hover,
+.link-btn:focus-visible {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+  border-left-color: var(--accent);
+  transform: translateX(4px);
+  box-shadow: -6px 0 0 var(--accent), 0 0 28px rgba(238, 45, 61, 0.35);
+}
+.link-btn:hover::before {
+  opacity: 1;
+}
+.link-btn:active {
+  transform: translateX(4px) scale(0.985);
+}
+.link-name {
+  font-weight: 700;
+}
+.link-btn:hover .link-detail {
+  color: #444;
+}
+.link-btn .link-arrow {
+  color: var(--accent);
+  font-size: 17px;
+  transition: transform 0.18s;
+}
+.link-btn:hover .link-arrow {
+  color: #000;
+  transform: translate(3px, -3px);
+}
+
+/* Desplegable y perfil de artista con el mismo lenguaje */
+.artists-box {
+  background: rgba(8, 8, 8, 0.82);
+  border-color: #4a4a4a;
+  border-radius: 4px;
+  backdrop-filter: blur(3px);
+}
+.artists-box summary {
+  color: var(--fg);
+}
+.artists-box summary:hover {
+  color: var(--accent);
+}
+.artists-box .count {
+  color: var(--accent);
+}
+.artist-title {
+  text-shadow: 0 0 24px rgba(238, 45, 61, 0.45);
+}
+.artist-head .avatar {
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 26px rgba(238, 45, 61, 0.45);
+}
+.site-footer {
+  color: #8a8a8a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
