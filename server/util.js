@@ -5,6 +5,7 @@ export function cleanLinks(list, { keepEmptyUrl = false } = {}) {
     .map((e) => ({
       url: String((typeof e === 'string' ? e : e?.url) ?? '').trim(),
       label: String((typeof e === 'string' ? '' : e?.label) ?? '').trim(),
+      icon: String((typeof e === 'string' ? '' : e?.icon) ?? '').trim(),
     }))
     .filter((e) => e.url || (keepEmptyUrl && e.label));
 }

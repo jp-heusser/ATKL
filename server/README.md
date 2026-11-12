@@ -22,7 +22,7 @@ El `.env` está en `.gitignore`: **nunca** se sube al repositorio.
 | `Photo` | `photos` | Imagen de perfil de cada artista |
 | `User` | `users` | Para el login (siguiente etapa): `email` (único), `passwordHash`, `role` (`admin` / `artist`), `artist` → Artist, `active`, `lastLoginAt` |
 
-Cada enlace es `{ url, label }`. La URL debe empezar con `https://` o `mailto:`; la plataforma la reconoce la web a partir de la URL.
+Cada enlace es `{ url, label, icon }`. La URL debe empezar con `https://` o `mailto:`. El ícono se reconoce solo a partir de la URL; `icon` permite elegir otro a mano desde el panel (lista en `src/platforms.js`).
 
 ## Rutas
 

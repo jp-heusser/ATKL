@@ -10,7 +10,7 @@ import User from './models/User.js';
 import { label } from '../src/data/label.js';
 import { artists } from '../src/data/artists.js';
 
-const toLink = (e) => (typeof e === 'string' ? { url: e, label: '' } : { url: e.url || '', label: e.label || '' });
+const toLink = (e) => (typeof e === 'string' ? { url: e, label: '', icon: '' } : { url: e.url || '', label: e.label || '', icon: e.icon || '' });
 
 try {
   const conn = await connectDB();

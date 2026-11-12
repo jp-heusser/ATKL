@@ -4,7 +4,11 @@ export function PlatformIcon({ icon, badge, size = 18 }) {
   if (icon) {
     return (
       <svg className="pf-icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-        <path d={icon.path} fill="currentColor" />
+        {icon.stroke ? (
+          <path d={icon.path} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        ) : (
+          <path d={icon.path} fill="currentColor" />
+        )}
       </svg>
     );
   }

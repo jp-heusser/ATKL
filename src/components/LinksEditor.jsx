@@ -1,5 +1,5 @@
-/* Editor de una lista de enlaces: URL + nombre opcional, con agregar, quitar y reordenar. */
-import { resolveLink } from '../platforms.js';
+/* Editor de una lista de enlaces: URL, nombre opcional e ícono, con agregar, quitar y reordenar. */
+import { resolveLink, ICON_CHOICES } from '../platforms.js';
 import { PlatformIcon } from './LinkButton.jsx';
 
 export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombre (opcional)' }) {
@@ -15,7 +15,7 @@ export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombr
   return (
     <div className="links-editor">
       {links.map((l, i) => {
-        const info = /^(https:\/\/|mailto:)/.test(l.url) ? resolveLink({ url: l.url }) : null;
+        const info = /^(https:\/\/|mailto:)/.test(l.url) ? resolveLink({ url: l.url, icon: l.icon }) : null;
         return (
           <div className="le-row" key={i}>
             <span className="le-icon">{info ? <PlatformIcon icon={info.icon} badge={info.badge} /> : '·'}</span>
@@ -36,6 +36,14 @@ export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombr
                 onChange={(e) => set(i, { label: e.target.value })}
                 aria-label={`Nombre del enlace ${i + 1}`}
               />
+              <select value={l.icon || ''} onChange={(e) => set(i, { icon: e.target.value })} aria-label={`Ícono del enlace ${i + 1}`}>
+                <option value="">Ícono: automático</option>
+                {ICON_CHOICES.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="le-actions">
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">↑</button>
@@ -45,7 +53,7 @@ export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombr
           </div>
         );
       })}
-      <button type="button" className="btn-ghost" onClick={() => onChange([...links, { url: '', label: '' }])}>
+      <button type="button" className="btn-ghost" onClick={() => onChange([...links, { url: '', label: '', icon: '' }])}>
         + Agregar enlace
       </button>
     </div>

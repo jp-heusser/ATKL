@@ -753,3 +753,16 @@ details.card[open] summary {
   align-items: center;
   gap: 12px;
 }
+
+.le-fields select {
+  padding: 7px 8px;
+  font-size: 13px;
+  color: var(--mute);
+}
+.le-row {
+  align-items: flex-start;
+}
+.le-icon {
+  margin-top: 10px;
+  color: var(--fg);
+}
