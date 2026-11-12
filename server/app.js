@@ -16,7 +16,7 @@ const app = express();
 // Orígenes que pueden llamar a la API (separados por coma). Vacío = cualquiera (solo lectura pública).
 const origins = (process.env.CORS_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean);
 app.use(cors(origins.length ? { origin: origins } : undefined));
-app.use(express.json({ limit: '100kb' }));
+app.use(express.json({ limit: '1mb' })); // las fotos llegan en base64 (máx. 600 kB)
 app.disable('x-powered-by');
 
 app.set('trust proxy', 1); // IP real detrás del proxy del hosting (para el límite de intentos)
@@ -45,6 +45,8 @@ app.use((err, _req, res, _next) => {
     return res.status(400).json({ error: msg || 'Datos no válidos' });
   }
   if (err?.code === 11000) return res.status(409).json({ error: 'Ya existe un registro con ese valor (slug o correo)' });
+  if (err?.status === 400) return res.status(400).json({ error: err.message });
+  if (err?.type === 'entity.too.large') return res.status(413).json({ error: 'La imagen es demasiado grande' });
   if (err?.type === 'entity.parse.failed') return res.status(400).json({ error: 'JSON no válido' });
   console.error(err);
   res.status(500).json({ error: 'Error interno' });

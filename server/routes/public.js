@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
+import Photo from '../models/Photo.js';
 
 const router = Router();
 const ARTIST_FIELDS = 'slug name role city photo links order -_id';
@@ -30,6 +31,19 @@ router.get('/artists/:slug', async (req, res, next) => {
       .lean();
     if (!artist) return res.status(404).json({ error: 'Artista no encontrado' });
     res.json(artist);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// Fotos de perfil (guardadas en la base).
+router.get('/photos/:id', async (req, res, next) => {
+  try {
+    if (!/^[a-f0-9]{24}$/i.test(req.params.id)) return res.status(404).end();
+    const photo = await Photo.findOne({ artist: req.params.id }).lean();
+    if (!photo) return res.status(404).end();
+    res.set({ 'Content-Type': photo.type, 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' });
+    res.send(Buffer.isBuffer(photo.data) ? photo.data : Buffer.from(photo.data.buffer));
   } catch (e) {
     next(e);
   }

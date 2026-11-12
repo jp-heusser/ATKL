@@ -5,11 +5,12 @@ import Artist from '../models/Artist.js';
 import User from '../models/User.js';
 import { requireAuth, requireAdmin, hashPassword, tempPassword } from '../auth.js';
 import { assign, cleanLinks } from '../util.js';
+import { savePhoto, removePhoto } from '../photos.js';
 
 const router = Router();
 router.use(requireAuth, requireAdmin);
 
-const ARTIST_TEXT = ['name', 'role', 'city', 'photo'];
+const ARTIST_TEXT = ['name', 'role', 'city']; // la foto se sube aparte
 
 function applyArtist(artist, body) {
   assign(artist, body, ARTIST_TEXT);
@@ -64,6 +65,22 @@ router.put('/artists/:slug', async (req, res) => {
   applyArtist(artist, req.body || {});
   await artist.save();
   res.json({ ok: true });
+});
+
+router.put('/artists/:slug/photo', async (req, res) => {
+  const artist = await Artist.findOne({ slug: String(req.params.slug).toLowerCase() });
+  if (!artist) return res.status(404).json({ error: 'Artista no encontrado' });
+  await savePhoto(artist, req.body?.image);
+  await artist.save();
+  res.json({ photo: artist.photo });
+});
+
+router.delete('/artists/:slug/photo', async (req, res) => {
+  const artist = await Artist.findOne({ slug: String(req.params.slug).toLowerCase() });
+  if (!artist) return res.status(404).json({ error: 'Artista no encontrado' });
+  await removePhoto(artist);
+  await artist.save();
+  res.json({ photo: '' });
 });
 
 /* ----- Cuentas de artista -----

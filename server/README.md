@@ -19,6 +19,7 @@ El `.env` está en `.gitignore`: **nunca** se sube al repositorio.
 |---|---|---|
 | `Label` | `labels` | Un solo documento: `name`, `bio`, `socials[]` (íconos), `links[]` (botones en orden) |
 | `Artist` | `artists` | `slug` (único), `name`, `role`, `city`, `photo`, `links[]`, `order`, `active`, `owner` → User |
+| `Photo` | `photos` | Imagen de perfil de cada artista |
 | `User` | `users` | Para el login (siguiente etapa): `email` (único), `passwordHash`, `role` (`admin` / `artist`), `artist` → Artist, `active`, `lastLoginAt` |
 
 Cada enlace es `{ url, label }`. La URL debe empezar con `https://` o `mailto:`; la plataforma la reconoce la web a partir de la URL.
@@ -36,7 +37,7 @@ Cada enlace es `{ url, label }`. La URL debe empezar con `https://` o `mailto:`;
 - `POST /api/auth/password` — `{ current, next }` (mínimo 10 caracteres).
 
 **Artista** (su propio perfil)
-- `GET /api/me/artist` · `PUT /api/me/artist` — edita nombre, rol, ciudad, foto (URL https) y enlaces. No puede cambiar slug, orden ni visibilidad.
+- `GET /api/me/artist` · `PUT /api/me/artist` — edita nombre, rol, ciudad y enlaces. No puede cambiar slug, orden ni visibilidad.
 
 **Admin**
 - `GET/PUT /api/admin/label` — datos del sello.
@@ -66,9 +67,16 @@ El enlace "Acceso" aparece al pie de la web solo cuando hay API configurada.
 
 En producción, la web necesita la variable `VITE_API_URL` con la dirección pública de la API al hacer el build, y conviene limitar `CORS_ORIGIN` al dominio de la web. GitHub Pages solo sirve archivos estáticos: la API debe alojarse aparte (Render, Railway, Fly.io, un VPS…).
 
+## Fotos de perfil
+
+Se suben desde el panel. El navegador las recorta cuadradas a 400×400 (JPEG) antes de enviarlas.
+
+Se guardan en MongoDB (colección `photos`, una por artista) y se sirven en `/api/photos/:id`. Funciona igual en local y en Vercel; como ambos usan la misma base, la foto subida en uno se ve en el otro.
+
+Rutas: `PUT/DELETE /api/me/photo` (artista) y `PUT/DELETE /api/admin/artists/:slug/photo` (admin), con cuerpo `{ image: "data:image/jpeg;base64,…" }`. Se aceptan JPG, PNG y WebP de hasta 600 kB.
+
 ## Pendiente
 
-- Subida de fotos (por ahora la foto es una URL).
 - Recuperación de contraseña por correo (hoy la reinicia un admin).
 
 ## Publicar en Vercel (web + API juntas)

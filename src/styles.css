@@ -729,3 +729,27 @@ details.card[open] summary {
 .site-footer a {
   color: inherit;
 }
+
+/* Foto de perfil en el panel */
+.photo-field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.photo-field .avatar {
+  border: 2px solid var(--accent);
+}
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.photo-actions .form-label {
+  margin-top: 0;
+}
+.photo-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

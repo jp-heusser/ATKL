@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { api, setToken } from '../api.js';
 import LinksEditor from './LinksEditor.jsx';
+import PhotoField from './PhotoField.jsx';
 
 const blank = { name: '', role: '', city: '', photo: '', links: [] };
 
@@ -28,10 +29,10 @@ const Status = ({ s }) => (
 );
 
 /* ---------- Perfil de artista (propio, o el elegido por el admin) ---------- */
-function ArtistForm({ initial, onSave, admin, onSaved }) {
+function ArtistForm({ initial, onSave, admin, onSaved, photoPath }) {
   const [a, setA] = useState({ ...blank, ...initial });
   const [s, run] = useSaver();
-  useEffect(() => setA({ ...blank, ...initial }), [initial]);
+  useEffect(() => setA({ ...blank, ...initial }), [initial?.slug]); // no pisa lo que se está editando
   const field = (k) => ({ value: a[k] ?? '', onChange: (e) => setA({ ...a, [k]: e.target.value }) });
 
   const submit = (e) => {
@@ -44,12 +45,24 @@ function ArtistForm({ initial, onSave, admin, onSaved }) {
 
   return (
     <form className="card form" onSubmit={submit}>
+      <PhotoField
+        artist={a}
+        onUpload={async (image) => {
+          const r = await api(photoPath, { method: 'PUT', body: { image } });
+          setA((x) => ({ ...x, photo: r.photo }));
+          onSaved?.();
+        }}
+        onRemove={async () => {
+          await api(photoPath, { method: 'DELETE' });
+          setA((x) => ({ ...x, photo: '' }));
+          onSaved?.();
+        }}
+      />
       <label>Nombre artístico<input required maxLength={80} {...field('name')} /></label>
       <div className="form-2">
         <label>Rol<input maxLength={80} placeholder="DJ / Productor" {...field('role')} /></label>
         <label>Ciudad<input maxLength={60} {...field('city')} /></label>
       </div>
-      <label>Foto (URL https, cuadrada)<input type="url" placeholder="https://…" {...field('photo')} /></label>
       <span className="form-label">Enlaces</span>
       <LinksEditor links={a.links} onChange={(links) => setA({ ...a, links })} />
       {admin && (
@@ -172,6 +185,7 @@ function AdminArtists({ onSaved }) {
         <>
           <ArtistForm
             admin
+            photoPath={`/admin/artists/${current.slug}/photo`}
             initial={current}
             onSave={(a) => api(`/admin/artists/${current.slug}`, { method: 'PUT', body: a })}
             onSaved={() => { load(); onSaved?.(); }}
@@ -245,6 +259,7 @@ export default function Panel({ user, onLogout, onChanged }) {
           {error && <p className="msg msg-error">{error}</p>}
           {mine && (
             <ArtistForm
+              photoPath="/me/photo"
               initial={mine}
               onSave={async (a) => setMine(await api('/me/artist', { method: 'PUT', body: a }))}
               onSaved={onChanged}
