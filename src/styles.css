@@ -766,3 +766,56 @@ details.card[open] summary {
   margin-top: 10px;
   color: var(--fg);
 }
+
+/* Destacados de Instagram */
+.ig-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.ig-section {
+  margin-top: 32px;
+}
+.ig-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.ig-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.ig-item {
+  width: 100%;
+  max-width: 400px;
+  min-height: 120px;
+}
+/* Mientras Instagram no carga (o si lo bloquea el navegador) queda un botón al post. */
+.ig-item .instagram-media {
+  display: block;
+  margin: 0 !important;
+  padding: 16px;
+  border: 1px solid #4a4a4a;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: rgba(8, 8, 8, 0.82);
+}
+.ig-item blockquote a {
+  font-weight: 700;
+}
+.ig-item blockquote a:hover {
+  color: var(--accent);
+}
+.ig-item iframe {
+  border-radius: 4px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}

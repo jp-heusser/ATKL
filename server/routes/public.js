@@ -5,7 +5,7 @@ import Artist from '../models/Artist.js';
 import Photo from '../models/Photo.js';
 
 const router = Router();
-const ARTIST_FIELDS = 'slug name role city photo links order -_id';
+const ARTIST_FIELDS = 'slug name role city photo links instagram order -_id';
 
 router.get('/health', (_req, res) => res.json({ ok: true }));
 

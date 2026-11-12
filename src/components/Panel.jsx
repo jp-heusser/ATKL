@@ -4,7 +4,8 @@ import { api, setToken } from '../api.js';
 import LinksEditor from './LinksEditor.jsx';
 import PhotoField from './PhotoField.jsx';
 
-const blank = { name: '', role: '', city: '', photo: '', links: [] };
+const blank = { name: '', role: '', city: '', photo: '', links: [], instagram: [] };
+const MAX_IG = 3;
 
 function useSaver() {
   const [state, setState] = useState({ busy: false, ok: '', error: '' });
@@ -65,6 +66,27 @@ function ArtistForm({ initial, onSave, admin, onSaved, photoPath }) {
       </div>
       <span className="form-label">Enlaces</span>
       <LinksEditor links={a.links} onChange={(links) => setA({ ...a, links })} />
+      <span className="form-label">Destacados de Instagram (máx. {MAX_IG})</span>
+      <p className="form-hint">Pega el enlace de una publicación o reel público. Se muestran incrustados en tu página.</p>
+      {a.instagram.map((url, i) => (
+        <div className="ig-row" key={i}>
+          <input
+            type="url"
+            placeholder="https://www.instagram.com/p/…"
+            value={url}
+            onChange={(e) => setA({ ...a, instagram: a.instagram.map((u, k) => (k === i ? e.target.value : u)) })}
+            aria-label={`Publicación de Instagram ${i + 1}`}
+          />
+          <button type="button" className="btn-link" onClick={() => setA({ ...a, instagram: a.instagram.filter((_, k) => k !== i) })} aria-label="Quitar">
+            ✕
+          </button>
+        </div>
+      ))}
+      {a.instagram.length < MAX_IG && (
+        <button type="button" className="btn-ghost" onClick={() => setA({ ...a, instagram: [...a.instagram, ''] })}>
+          + Agregar publicación
+        </button>
+      )}
       {admin && (
         <label className="check">
           <input type="checkbox" checked={a.active !== false} onChange={(e) => setA({ ...a, active: e.target.checked })} />

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { isValidLink } from '../platforms.js';
 import LinkButton from './LinkButton.jsx';
 import Avatar from './Avatar.jsx';
+import InstagramEmbeds from './InstagramEmbeds.jsx';
 
 export default function ArtistPage({ artist }) {
   const [copied, setCopied] = useState(false);
@@ -44,6 +45,8 @@ export default function ArtistPage({ artist }) {
           <LinkButton key={i} entry={entry} />
         ))}
       </div>
+
+      <InstagramEmbeds urls={artist.instagram} />
 
       <button type="button" className="copy-btn" onClick={copy}>
         {copied ? 'Link copiado ✓' : 'Copiar link de este perfil'}

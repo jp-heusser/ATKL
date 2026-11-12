@@ -33,4 +33,12 @@ export const artists = [
       { url: 'https://www.mavelpoint.com/es/artist/desmont-landvik/overview', label: 'Press kit · Booking' },
     ],
   },
+  {
+    slug: 'dkstle',
+    name: 'DKSTLE',
+    role: 'DJ · Cantante · Artista multidisciplinaria',
+    city: '',
+    photo: '',
+    links: [{ url: 'https://esponsor.com/dkstle', label: 'Página oficial · eSponsor', icon: 'web' }],
+  },
 ];

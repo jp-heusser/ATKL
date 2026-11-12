@@ -1,6 +1,7 @@
 /* Carga en MongoDB los datos actuales de la web (src/data/label.js y artists.js).
    Uso:  npm run seed
-   Se puede ejecutar varias veces: actualiza lo existente, no duplica ni borra. */
+   Se puede ejecutar varias veces: solo agrega lo que falta; nunca modifica ni borra
+   lo que ya está en la base. */
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import { connectDB } from './db.js';
@@ -16,20 +17,27 @@ try {
   const conn = await connectDB();
   console.log(`Conectado a la base "${conn.name}"`);
 
-  await Label.findOneAndUpdate(
-    { key: 'main' },
-    { name: label.name, bio: label.bio, socials: label.socials.map(toLink), links: label.links.map(toLink) },
-    { upsert: true, runValidators: true, setDefaultsOnInsert: true },
-  );
-  console.log(`Sello: ${label.name} (${label.links.length} enlaces)`);
+  // Solo INSERTA lo que falta. Lo que ya existe en la base no se toca,
+  // para no pisar lo editado desde el panel (enlaces, fotos, etc.).
+  const opts = { upsert: true, runValidators: true };
 
-  for (const [i, a] of artists.entries()) {
-    await Artist.findOneAndUpdate(
+  const l = await Label.updateOne(
+    { key: 'main' },
+    { $setOnInsert: { name: label.name, bio: label.bio, socials: label.socials.map(toLink), links: label.links.map(toLink) } },
+    opts,
+  );
+  console.log(`Sello: ${label.name} → ${l.upsertedCount ? 'creado' : 'ya existía, sin cambios'}`);
+
+  const base = await Artist.countDocuments();
+  let added = 0;
+  for (const a of artists) {
+    const r = await Artist.updateOne(
       { slug: a.slug },
-      { name: a.name, role: a.role || '', city: a.city || '', photo: a.photo || '', links: a.links.map(toLink), order: i },
-      { upsert: true, runValidators: true, setDefaultsOnInsert: true },
+      { $setOnInsert: { name: a.name, role: a.role || '', city: a.city || '', photo: a.photo || '', links: a.links.map(toLink), order: base + added, active: true, owner: null } },
+      opts,
     );
-    console.log(`Artista: ${a.name}`);
+    if (r.upsertedCount) added++;
+    console.log(`Artista: ${a.name} → ${r.upsertedCount ? 'creado' : 'ya existía, sin cambios'}`);
   }
 
   // Crea las colecciones e índices (incluida "users", aún vacía).

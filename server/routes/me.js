@@ -2,14 +2,14 @@
 import { Router } from 'express';
 import Artist from '../models/Artist.js';
 import { requireAuth } from '../auth.js';
-import { assign, cleanLinks } from '../util.js';
+import { assign, cleanLinks, cleanInstagram } from '../util.js';
 import { savePhoto, removePhoto } from '../photos.js';
 
 const router = Router();
 router.use(requireAuth);
 
 const mine = (req) => (req.user.artist ? Artist.findById(req.user.artist) : null);
-const view = (a) => ({ slug: a.slug, name: a.name, role: a.role, city: a.city, photo: a.photo, links: a.links, active: a.active });
+const view = (a) => ({ slug: a.slug, name: a.name, role: a.role, city: a.city, photo: a.photo, links: a.links, instagram: a.instagram || [], active: a.active });
 
 router.get('/artist', async (req, res) => {
   const artist = await mine(req);
@@ -24,6 +24,7 @@ router.put('/artist', async (req, res) => {
   const body = req.body || {};
   assign(artist, body, ['name', 'role', 'city']);
   if (body.links !== undefined) artist.links = cleanLinks(body.links);
+  if (body.instagram !== undefined) artist.instagram = cleanInstagram(body.instagram);
   await artist.save();
   res.json(view(artist));
 });

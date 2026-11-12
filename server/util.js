@@ -19,3 +19,21 @@ export function assign(doc, body, fields) {
     if (v !== undefined) doc[f] = v;
   }
 }
+
+// Destacados de Instagram: hasta 3 URLs de posts o reels públicos, normalizadas.
+// Acepta  https://www.instagram.com/p/XXXX/ , /reel/XXXX/ , /reels/XXXX/ , /tv/XXXX/  (con o sin ?parámetros).
+export const MAX_INSTAGRAM = 3;
+export function cleanInstagram(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  for (const raw of list) {
+    const v = String(raw ?? '').trim();
+    if (!v) continue;
+    const m = /^https:\/\/(?:www\.)?instagram\.com\/(?:[A-Za-z0-9_.]+\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]{5,40})(?:[/?#].*)?$/.exec(v);
+    if (!m) throw Object.assign(new Error('Pega el enlace de una publicación o reel de Instagram (instagram.com/p/… o /reel/…)'), { status: 400 });
+    const url = `https://www.instagram.com/${m[1] === 'reels' ? 'reel' : m[1]}/${m[2]}/`;
+    if (!out.includes(url)) out.push(url);
+  }
+  if (out.length > MAX_INSTAGRAM) throw Object.assign(new Error(`Máximo ${MAX_INSTAGRAM} publicaciones de Instagram`), { status: 400 });
+  return out;
+}
