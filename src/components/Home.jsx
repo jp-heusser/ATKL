@@ -1,11 +1,10 @@
-import { label } from '../data/label.js';
 import { resolveLink, isValidLink } from '../platforms.js';
 import LinkButton, { PlatformIcon } from './LinkButton.jsx';
 import Avatar from './Avatar.jsx';
 
 const LOGO = `${import.meta.env.BASE_URL}logo-atkl.webp`;
 
-export default function Home({ artists }) {
+export default function Home({ label, artists }) {
   const socials = label.socials.filter(isValidLink).map(resolveLink);
   const links = label.links.filter(isValidLink);
 

@@ -18,7 +18,7 @@ export default function Avatar({ artist, size = 48 }) {
       <img
         className="avatar"
         style={style}
-        src={`${import.meta.env.BASE_URL}${artist.photo}`}
+        src={/^https:\/\//.test(artist.photo) ? artist.photo : `${import.meta.env.BASE_URL}${artist.photo}`}
         alt=""
         loading="lazy"
         width={size}

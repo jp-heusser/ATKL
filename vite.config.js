@@ -6,4 +6,6 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  // En desarrollo, /api va a la API local (npm run server).
+  server: { proxy: { '/api': 'http://localhost:3001' } },
 });

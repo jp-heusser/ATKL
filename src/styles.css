@@ -498,3 +498,234 @@ body::before {
     transition: none !important;
   }
 }
+
+/* ============================================================
+   Acceso y panel de edición
+   ============================================================ */
+.card {
+  background: rgba(8, 8, 8, 0.9);
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  padding: 18px 16px;
+  margin-top: 14px;
+  backdrop-filter: blur(3px);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.form-title {
+  font: 800 34px/1 var(--display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.form-hint {
+  font-size: 13px;
+  color: var(--mute);
+}
+a.form-hint:hover {
+  color: var(--fg);
+}
+.form label,
+.form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.form-label {
+  margin-top: 6px;
+  color: var(--fg);
+}
+.form-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.form input:not([type='checkbox']),
+.form select,
+.form textarea {
+  width: 100%;
+  background: #000;
+  color: var(--fg);
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  padding: 10px;
+  font: 15px var(--font);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(238, 45, 61, 0.3);
+}
+.form label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: 3px;
+  padding: 12px 16px;
+  font: 700 13px var(--font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-primary:hover {
+  background: #fff;
+  color: #000;
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.btn-ghost {
+  background: none;
+  color: var(--fg);
+  border: 1px dashed #4a4a4a;
+  border-radius: 3px;
+  padding: 10px;
+  font: 13px var(--font);
+  cursor: pointer;
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-link {
+  background: none;
+  border: 0;
+  color: var(--mute);
+  font: 12px var(--font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn-link:hover {
+  color: var(--accent);
+}
+.panel-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.msg {
+  font-size: 13px;
+  padding: 9px 11px;
+  border-radius: 3px;
+  border-left: 3px solid;
+}
+.msg-error {
+  color: #ff8a93;
+  border-color: var(--accent);
+  background: rgba(238, 45, 61, 0.12);
+}
+.msg-ok {
+  color: #b9f5c8;
+  border-color: #3ecf6a;
+  background: rgba(62, 207, 106, 0.1);
+}
+.msg code {
+  font: 600 14px ui-monospace, Consolas, monospace;
+  color: #fff;
+  user-select: all;
+}
+.links-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.le-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.le-icon {
+  width: 18px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--mute);
+}
+.le-fields {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.le-fields input {
+  padding: 8px 10px !important;
+  font-size: 14px !important;
+}
+.le-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.le-actions button {
+  width: 26px;
+  height: 22px;
+  background: none;
+  color: var(--mute);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.le-actions button:hover:not(:disabled) {
+  color: #fff;
+  border-color: var(--accent);
+}
+.le-actions button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 18px;
+}
+.tabs button {
+  flex: 1;
+  background: none;
+  color: var(--mute);
+  border: 1px solid #4a4a4a;
+  border-radius: 3px;
+  padding: 10px;
+  font: 700 12px var(--font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tabs button[aria-selected='true'] {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+details.card summary {
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+details.card[open] summary {
+  margin-bottom: 14px;
+  color: var(--fg);
+}
+.site-footer a {
+  color: inherit;
+}
