@@ -840,11 +840,12 @@ details.card[open] summary {
   min-height: 90px;
   display: flex;
   justify-content: center;
-  padding: 10px;
 }
+/* Antes de que cargue Instagram (o si no carga): enlace al post, con el estilo del sitio. */
 .embed-ig .instagram-media {
   margin: 0 !important;
-  padding: 14px;
+  padding: 18px 14px;
+  width: 100%;
 }
 .embed-ig blockquote a {
   font-weight: 700;
@@ -852,11 +853,25 @@ details.card[open] summary {
 .embed-ig blockquote a:hover {
   color: var(--accent);
 }
+/* La tarjeta de Instagram es un iframe de otro sitio: su interior (blanco) no se puede
+   recolorear. Lo que sí controlamos: que llene el marco sin borde propio ni márgenes,
+   y que nunca sea más ancha que la pantalla. */
 .embed-ig iframe {
+  display: block;
   min-width: 0 !important;
+  width: 100% !important;
   max-width: 100% !important;
   margin: 0 !important;
-  border-radius: 3px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #fff;
+}
+/* Celulares angostos: Instagram necesita ~326 px; el bloque usa casi todo el ancho. */
+@media (max-width: 380px) {
+  .embed-instagram {
+    margin-inline: -12px;
+  }
 }
 .le-embed {
   font-size: 11px !important;
