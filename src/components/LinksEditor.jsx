@@ -1,8 +1,10 @@
-/* Editor de una lista de enlaces: URL, nombre opcional e ícono, con agregar, quitar y reordenar. */
+/* Editor de una lista de enlaces: URL, nombre opcional e ícono, con agregar, quitar y reordenar.
+   Si la URL es de YouTube, SoundCloud o un post de Instagram, se puede mostrar incrustada. */
 import { resolveLink, ICON_CHOICES } from '../platforms.js';
 import { PlatformIcon } from './LinkButton.jsx';
+import { getEmbed } from '../embeds.js';
 
-export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombre (opcional)' }) {
+export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombre (opcional)', allowEmbed = true }) {
   const set = (i, patch) => onChange(links.map((l, k) => (k === i ? { ...l, ...patch } : l)));
   const move = (i, d) => {
     const j = i + d;
@@ -15,6 +17,7 @@ export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombr
   return (
     <div className="links-editor">
       {links.map((l, i) => {
+        const embed = allowEmbed ? getEmbed(l.url) : null;
         const info = /^(https:\/\/|mailto:)/.test(l.url) ? resolveLink({ url: l.url, icon: l.icon }) : null;
         return (
           <div className="le-row" key={i}>
@@ -44,6 +47,12 @@ export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombr
                   </option>
                 ))}
               </select>
+              {embed && (
+                <label className="check le-embed">
+                  <input type="checkbox" checked={!!l.embed} onChange={(e) => set(i, { embed: e.target.checked })} />
+                  Mostrar incrustado (reproductor de {embed.name})
+                </label>
+              )}
             </div>
             <div className="le-actions">
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="Subir">↑</button>
@@ -53,7 +62,7 @@ export default function LinksEditor({ links, onChange, labelPlaceholder = 'Nombr
           </div>
         );
       })}
-      <button type="button" className="btn-ghost" onClick={() => onChange([...links, { url: '', label: '', icon: '' }])}>
+      <button type="button" className="btn-ghost" onClick={() => onChange([...links, { url: '', label: '', icon: '', embed: false }])}>
         + Agregar enlace
       </button>
     </div>

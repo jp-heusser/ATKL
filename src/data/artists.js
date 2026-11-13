@@ -41,4 +41,77 @@ export const artists = [
     photo: '',
     links: [{ url: 'https://esponsor.com/dkstle', label: 'Página oficial · eSponsor', icon: 'web' }],
   },
+  {
+    slug: 'lurtz',
+    name: 'LURTZ',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+      { url: 'https://linktr.ee/lurtz.dj._', label: 'Página oficial · Linktree', icon: 'web' },
+    ],
+  },
+   {
+    slug: 'malagata',
+    name: 'MALA GATA',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  },
+  {
+    slug: '23ones',
+    name: '23ONES',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  },
+    {
+    slug: 'sweethate',
+    name: 'SWEAT HATE',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  },
+    {
+    slug: 'rodro',
+    name: 'RODRO',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  },
+    {
+    slug: 'petitemort',
+    name: 'PETITE MORT',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  },
+    {
+    slug: 'p4blo',
+    name: 'P4BL0',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  },
+    {
+    slug: 'cyber',
+    name: 'CYBER',
+    role: 'DJ',
+    city: '',
+    photo: '',
+    links: [
+    ],
+  }
 ];

@@ -18,11 +18,11 @@ El `.env` está en `.gitignore`: **nunca** se sube al repositorio.
 | Modelo | Colección | Contenido |
 |---|---|---|
 | `Label` | `labels` | Un solo documento: `name`, `bio`, `socials[]` (íconos), `links[]` (botones en orden) |
-| `Artist` | `artists` | `slug` (único), `name`, `role`, `city`, `photo`, `links[]`, `instagram[]` (hasta 3 posts/reels incrustados), `order`, `active`, `owner` → User |
+| `Artist` | `artists` | `slug` (único), `name`, `role`, `city`, `photo`, `links[]`, `order`, `active`, `owner` → User |
 | `Photo` | `photos` | Imagen de perfil de cada artista |
 | `User` | `users` | Para el login (siguiente etapa): `email` (único), `passwordHash`, `role` (`admin` / `artist`), `artist` → Artist, `active`, `lastLoginAt` |
 
-Cada enlace es `{ url, label, icon }`. La URL debe empezar con `https://` o `mailto:`. El ícono se reconoce solo a partir de la URL; `icon` permite elegir otro a mano desde el panel (lista en `src/platforms.js`).
+Cada enlace es `{ url, label, icon, embed }`. Con `embed: true` se muestra como reproductor incrustado en vez de botón (YouTube, SoundCloud o un post/reel de Instagram; máximo 6 por lista). El orden de la lista es el orden en la página. La URL debe empezar con `https://` o `mailto:`. El ícono se reconoce solo a partir de la URL; `icon` permite elegir otro a mano desde el panel (lista en `src/platforms.js`).
 
 ## Rutas
 

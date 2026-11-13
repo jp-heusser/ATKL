@@ -1,5 +1,5 @@
 import { resolveLink, isValidLink } from '../platforms.js';
-import LinkButton, { PlatformIcon } from './LinkButton.jsx';
+import { LinkItem, PlatformIcon } from './LinkButton.jsx';
 import Avatar from './Avatar.jsx';
 
 const LOGO = `${import.meta.env.BASE_URL}logo-atkl.webp`;
@@ -35,7 +35,7 @@ export default function Home({ label, artists }) {
       <div className="link-stack">
         {links.map((entry, i) => (
           <div key={entry.url + entry.label} className="rise" style={{ animationDelay: `${80 + i * 55}ms` }}>
-            <LinkButton entry={entry} />
+            <LinkItem entry={entry} />
           </div>
         ))}
       </div>

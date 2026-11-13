@@ -20,8 +20,9 @@ const artistSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: '', maxlength: 60 },
     photo: { type: String, trim: true, default: '', maxlength: 500 }, // ruta en public/ o URL https
     links: { type: [linkSchema], default: [], validate: [(v) => v.length <= 30, 'Máximo 30 enlaces'] },
-    // Publicaciones o reels de Instagram que se muestran incrustados en su página (máx. 3).
-    instagram: { type: [String], default: [], validate: [(v) => v.length <= 3, 'Máximo 3 publicaciones de Instagram'] },
+    // Obsoleto: destacados de Instagram de una versión anterior. Ahora van en links con embed: true;
+    // se migran solos la próxima vez que se guarda el perfil.
+    instagram: { type: [String], default: [] },
     order: { type: Number, default: 0 }, // posición en la lista
     active: { type: Boolean, default: true }, // false = oculto en la web
     // Cuenta que podrá editar este perfil (cuando exista el login).

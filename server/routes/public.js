@@ -3,9 +3,11 @@ import { Router } from 'express';
 import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
 import Photo from '../models/Photo.js';
+import { linksWithLegacy } from '../util.js';
 
 const router = Router();
 const ARTIST_FIELDS = 'slug name role city photo links instagram order -_id';
+const present = ({ instagram, ...a }) => ({ ...a, links: linksWithLegacy({ links: a.links, instagram }) });
 
 router.get('/health', (_req, res) => res.json({ ok: true }));
 
@@ -18,7 +20,7 @@ router.get('/hub', async (_req, res, next) => {
     ]);
     if (!label) return res.status(404).json({ error: 'Sin datos del sello. Ejecuta: npm run seed' });
     res.set('Cache-Control', 'public, max-age=60');
-    res.json({ label, artists });
+    res.json({ label, artists: artists.map(present) });
   } catch (e) {
     next(e);
   }
@@ -30,7 +32,7 @@ router.get('/artists/:slug', async (req, res, next) => {
       .select(ARTIST_FIELDS)
       .lean();
     if (!artist) return res.status(404).json({ error: 'Artista no encontrado' });
-    res.json(artist);
+    res.json(present(artist));
   } catch (e) {
     next(e);
   }

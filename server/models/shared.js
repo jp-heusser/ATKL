@@ -16,6 +16,8 @@ export const linkSchema = new mongoose.Schema(
     label: { type: String, trim: true, default: '', maxlength: 120 },
     // Ícono elegido a mano (clave de src/platforms.js). Vacío = automático según la URL.
     icon: { type: String, trim: true, default: '', maxlength: 30, match: [/^[a-z0-9-]*$/, 'Ícono no válido'] },
+    // true = mostrar como reproductor incrustado (solo YouTube, SoundCloud o posts de Instagram).
+    embed: { type: Boolean, default: false },
   },
   { _id: false },
 );

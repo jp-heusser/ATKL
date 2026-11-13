@@ -4,7 +4,7 @@ import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
 import User from '../models/User.js';
 import { requireAuth, requireAdmin, hashPassword, tempPassword } from '../auth.js';
-import { assign, cleanLinks, cleanInstagram } from '../util.js';
+import { assign, cleanLinks, linksWithLegacy } from '../util.js';
 import { savePhoto, removePhoto } from '../photos.js';
 
 const router = Router();
@@ -14,8 +14,10 @@ const ARTIST_TEXT = ['name', 'role', 'city']; // la foto se sube aparte
 
 function applyArtist(artist, body) {
   assign(artist, body, ARTIST_TEXT);
-  if (body.links !== undefined) artist.links = cleanLinks(body.links);
-  if (body.instagram !== undefined) artist.instagram = cleanInstagram(body.instagram);
+  if (body.links !== undefined) {
+    artist.links = cleanLinks(body.links);
+    artist.instagram = []; // ya vienen dentro de links
+  }
   if (typeof body.active === 'boolean') artist.active = body.active;
   if (Number.isFinite(body.order)) artist.order = body.order;
 }
@@ -46,7 +48,7 @@ router.get('/artists', async (_req, res) => {
   res.json(
     artists.map((a) => ({
       slug: a.slug, name: a.name, role: a.role, city: a.city, photo: a.photo,
-      links: a.links, instagram: a.instagram || [], active: a.active, order: a.order, account: account.get(String(a._id)) || null,
+      links: linksWithLegacy(a), active: a.active, order: a.order, account: account.get(String(a._id)) || null,
     })),
   );
 });

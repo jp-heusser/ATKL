@@ -1,13 +1,30 @@
-// Normaliza una lista de enlaces recibida del cliente: [{url,label}] sin vacíos.
+// URLs que la web sabe mostrar incrustadas (la lógica fina está en src/embeds.js).
+const EMBEDDABLE = /^https:\/\/((www\.|m\.|music\.)?youtube\.com\/|youtu\.be\/|(www\.)?soundcloud\.com\/|(www\.)?instagram\.com\/)/;
+export const MAX_EMBEDS = 6;
+
+// Normaliza una lista de enlaces recibida del cliente: [{url,label,icon,embed}] sin vacíos.
 export function cleanLinks(list, { keepEmptyUrl = false } = {}) {
   if (!Array.isArray(list)) return [];
-  return list
+  const out = list
     .map((e) => ({
       url: String((typeof e === 'string' ? e : e?.url) ?? '').trim(),
       label: String((typeof e === 'string' ? '' : e?.label) ?? '').trim(),
       icon: String((typeof e === 'string' ? '' : e?.icon) ?? '').trim(),
+      embed: typeof e !== 'string' && e?.embed === true,
     }))
-    .filter((e) => e.url || (keepEmptyUrl && e.label));
+    .filter((e) => e.url || (keepEmptyUrl && e.label))
+    .map((e) => ({ ...e, embed: e.embed && EMBEDDABLE.test(e.url) }));
+  if (out.filter((e) => e.embed).length > MAX_EMBEDS)
+    throw Object.assign(new Error(`Máximo ${MAX_EMBEDS} reproductores incrustados (hacen más lenta la página)`), { status: 400 });
+  return out;
+}
+
+// Compatibilidad: los "destacados de Instagram" de la versión anterior (campo artist.instagram)
+// se muestran como enlaces incrustados al final de la lista.
+export function linksWithLegacy(artist) {
+  const links = (artist.links || []).map((l) => ({ url: l.url, label: l.label || '', icon: l.icon || '', embed: !!l.embed }));
+  for (const url of artist.instagram || []) links.push({ url, label: '', icon: '', embed: true });
+  return links;
 }
 
 export const str = (v) => (typeof v === 'string' ? v.trim() : undefined);
@@ -20,20 +37,3 @@ export function assign(doc, body, fields) {
   }
 }
 
-// Destacados de Instagram: hasta 3 URLs de posts o reels públicos, normalizadas.
-// Acepta  https://www.instagram.com/p/XXXX/ , /reel/XXXX/ , /reels/XXXX/ , /tv/XXXX/  (con o sin ?parámetros).
-export const MAX_INSTAGRAM = 3;
-export function cleanInstagram(list) {
-  if (!Array.isArray(list)) return [];
-  const out = [];
-  for (const raw of list) {
-    const v = String(raw ?? '').trim();
-    if (!v) continue;
-    const m = /^https:\/\/(?:www\.)?instagram\.com\/(?:[A-Za-z0-9_.]+\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]{5,40})(?:[/?#].*)?$/.exec(v);
-    if (!m) throw Object.assign(new Error('Pega el enlace de una publicación o reel de Instagram (instagram.com/p/… o /reel/…)'), { status: 400 });
-    const url = `https://www.instagram.com/${m[1] === 'reels' ? 'reel' : m[1]}/${m[2]}/`;
-    if (!out.includes(url)) out.push(url);
-  }
-  if (out.length > MAX_INSTAGRAM) throw Object.assign(new Error(`Máximo ${MAX_INSTAGRAM} publicaciones de Instagram`), { status: 400 });
-  return out;
-}

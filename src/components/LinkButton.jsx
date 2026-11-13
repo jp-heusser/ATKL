@@ -1,4 +1,6 @@
 import { resolveLink } from '../platforms.js';
+import { getEmbed } from '../embeds.js';
+import EmbedBlock from './EmbedBlock.jsx';
 
 export function PlatformIcon({ icon, badge, size = 18 }) {
   if (icon) {
@@ -45,4 +47,9 @@ export default function LinkButton({ entry }) {
       </span>
     </a>
   );
+}
+
+// Un elemento de la lista: reproductor incrustado si el enlace lo pide y la URL lo permite; si no, botón.
+export function LinkItem({ entry }) {
+  return typeof entry !== 'string' && entry.embed && getEmbed(entry.url) ? <EmbedBlock entry={entry} /> : <LinkButton entry={entry} />;
 }

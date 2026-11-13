@@ -767,55 +767,58 @@ details.card[open] summary {
   color: var(--fg);
 }
 
-/* Destacados de Instagram */
-.ig-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.ig-section {
-  margin-top: 32px;
-}
-.ig-title {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--mute);
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 16px;
-}
-.ig-list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-.ig-item {
-  width: 100%;
-  max-width: 400px;
-  min-height: 120px;
-}
-/* Mientras Instagram no carga (o si lo bloquea el navegador) queda un botón al post. */
-.ig-item .instagram-media {
-  display: block;
-  margin: 0 !important;
-  padding: 16px;
+/* Reproductores incrustados (YouTube, SoundCloud, Instagram) dentro de la lista de enlaces */
+.embed {
+  margin: 4px 0;
   border: 1px solid #4a4a4a;
   border-left: 3px solid var(--accent);
   border-radius: 4px;
   background: rgba(8, 8, 8, 0.82);
+  overflow: hidden;
 }
-.ig-item blockquote a {
+.embed-caption {
+  padding: 10px 14px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--line);
+}
+.embed iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: #000;
+}
+.embed-youtube iframe {
+  height: auto;
+}
+.embed-vertical iframe {
+  max-width: 300px;
+  margin: 0 auto;
+}
+.embed-ig {
+  min-height: 90px;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+.embed-ig .instagram-media {
+  margin: 0 !important;
+  padding: 14px;
+}
+.embed-ig blockquote a {
   font-weight: 700;
 }
-.ig-item blockquote a:hover {
+.embed-ig blockquote a:hover {
   color: var(--accent);
 }
-.ig-item iframe {
-  border-radius: 4px !important;
+.embed-ig iframe {
   min-width: 0 !important;
-  width: 100% !important;
+  max-width: 100% !important;
   margin: 0 !important;
+  border-radius: 3px !important;
+}
+.le-embed {
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+  text-transform: none !important;
+  color: var(--fg) !important;
 }
