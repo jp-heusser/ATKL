@@ -5,7 +5,8 @@
   --mute: #a3a3a3;
   --line: #2e2e2e;
   --hover: #0f0f0f;
-  --accent: #ee2d3d;
+  --accent: #ee2d3d; /* rojo del sello (modo oscuro) */
+  --accent-rgb: 238, 45, 61; /* el mismo color, para brillos con transparencia */
   --border: #4a4a4a; /* bordes de botones y tarjetas */
   --panel: rgba(8, 8, 8, 0.82); /* fondo de botones */
   --card: rgba(8, 8, 8, 0.9); /* fondo de formularios */
@@ -24,10 +25,12 @@
   --display: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
 }
 
-/* Modo claro. El sitio abre SIEMPRE en oscuro; el claro solo se activa con el botón
+/* Modo claro: celeste en lugar de rojo. El sitio abre SIEMPRE en oscuro; el claro solo se activa con el botón
    de la esquina (no sigue la preferencia del sistema). */
 :root[data-theme='light'] {
   color-scheme: light;
+  --accent: #0a96dc; /* en modo claro el celeste reemplaza al rojo */
+  --accent-rgb: 10, 150, 220;
   --bg: #f4f4f1;
   --fg: #0a0a0a;
   --mute: #585858;
@@ -384,7 +387,7 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 38% at 50% 0%, rgba(238, 45, 61, 0.26), transparent 70%),
+    radial-gradient(ellipse 70% 38% at 50% 0%, rgba(var(--accent-rgb), 0.26), transparent 70%),
     radial-gradient(ellipse 90% 60% at 50% 55%, var(--vignette), transparent 80%);
 }
 .page,
@@ -402,7 +405,7 @@ body::before {
 .logo-wrap .logo {
   width: 100%;
   margin: 0;
-  filter: drop-shadow(0 0 22px rgba(238, 45, 61, 0.55));
+  filter: drop-shadow(0 0 22px rgba(var(--accent-rgb), 0.55));
 }
 .logo-ghost {
   position: absolute;
@@ -423,7 +426,7 @@ body::before {
 
 .label-name {
   font-size: 38px;
-  text-shadow: 0 0 24px rgba(238, 45, 61, 0.45);
+  text-shadow: 0 0 24px rgba(var(--accent-rgb), 0.45);
 }
 .label-bio {
   color: var(--soft);
@@ -436,7 +439,7 @@ body::before {
   color: #fff;
   background: var(--accent);
   border-color: var(--accent);
-  box-shadow: 0 0 18px rgba(238, 45, 61, 0.6);
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.6);
   transform: translateY(-2px);
 }
 .label-socials a {
@@ -465,7 +468,7 @@ body::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), rgba(238, 45, 61, 0.45), transparent 70%);
+  background: radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--accent-rgb), 0.45), transparent 70%);
   opacity: 0;
   transition: opacity 0.2s;
   pointer-events: none;
@@ -480,7 +483,7 @@ body::before {
   border-color: var(--inv-bg);
   border-left-color: var(--accent);
   transform: translateX(4px);
-  box-shadow: -6px 0 0 var(--accent), 0 0 28px rgba(238, 45, 61, 0.35);
+  box-shadow: -6px 0 0 var(--accent), 0 0 28px rgba(var(--accent-rgb), 0.35);
 }
 .link-btn:hover::before {
   opacity: 1;
@@ -521,11 +524,11 @@ body::before {
   color: var(--accent);
 }
 .artist-title {
-  text-shadow: 0 0 24px rgba(238, 45, 61, 0.45);
+  text-shadow: 0 0 24px rgba(var(--accent-rgb), 0.45);
 }
 .artist-head .avatar {
   border: 2px solid var(--accent);
-  box-shadow: 0 0 26px rgba(238, 45, 61, 0.45);
+  box-shadow: 0 0 26px rgba(var(--accent-rgb), 0.45);
 }
 .site-footer {
   color: var(--faint);
@@ -603,7 +606,7 @@ a.form-hint:hover {
 .form textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(238, 45, 61, 0.3);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.3);
 }
 .form label.check {
   flex-direction: row;
@@ -669,7 +672,7 @@ a.form-hint:hover {
 .msg-error {
   color: var(--err);
   border-color: var(--accent);
-  background: rgba(238, 45, 61, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
 }
 .msg-ok {
   color: var(--ok);
@@ -865,14 +868,14 @@ details.card[open] summary {
 /* ---------- Modo claro: ajustes puntuales ---------- */
 :root[data-theme='light'] .logo-wrap .logo {
   /* el logo es blanco: se invierte a negro */
-  filter: invert(1) drop-shadow(0 0 14px rgba(238, 45, 61, 0.3));
+  filter: invert(1) drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.3));
 }
 :root[data-theme='light'] .logo-ghost {
   display: none;
 }
 :root[data-theme='light'] body::before {
   background:
-    radial-gradient(ellipse 70% 38% at 50% 0%, rgba(238, 45, 61, 0.16), transparent 70%),
+    radial-gradient(ellipse 70% 38% at 50% 0%, rgba(var(--accent-rgb), 0.16), transparent 70%),
     radial-gradient(ellipse 90% 60% at 50% 55%, var(--vignette), transparent 80%);
 }
 :root[data-theme='light'] .label-name,

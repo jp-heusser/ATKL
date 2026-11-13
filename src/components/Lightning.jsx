@@ -1,5 +1,5 @@
 /* Fondo de rayos interactivo (canvas 2D, sin librerías).
-   - Cada pocos segundos cae un rayo celeste ramificado desde arriba, con un destello suave.
+   - Cada pocos segundos cae un rayo ramificado (rojo en modo oscuro, celeste en modo claro) desde arriba, con un destello suave.
    - Un clic o toque hace caer un rayo justo en ese punto, con chispas.
    - En escritorio, el cursor suelta pequeños arcos eléctricos al moverse.
    Se pausa con la pestaña oculta y se desactiva con "reducir movimiento".
@@ -9,9 +9,9 @@ const MIN_GAP = 1400; // ms mínimo entre rayos automáticos
 const MAX_GAP = 4200; // ms máximo entre rayos automáticos
 const FLASH = 0.07; // intensidad del destello de pantalla (0 = sin destello)
 
-// Colores del rayo (R,G,B) según el tema. Celeste.
+// Colores del rayo (R,G,B) según el tema: rojo en oscuro, celeste en claro.
 const COLORS = {
-  dark: { glow: '70,195,255', core: '235,250,255', flash: '220,244,255', spark: '120,215,255' },
+  dark: { glow: '238,45,61', core: '255,255,255', flash: '255,235,238', spark: '238,45,61' },
   light: { glow: '0,150,235', core: '0,92,170', flash: null, spark: '0,120,210' }, // sin destello sobre fondo claro
 };
 const palette = () => COLORS[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'];
@@ -109,7 +109,7 @@ export default function Lightning() {
           ctx.beginPath();
           ctx.moveTo(pts[0][0], pts[0][1]);
           for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
-          // resplandor celeste
+          // resplandor (rojo o celeste)
           ctx.shadowColor = `rgba(${c.glow},${a})`;
           ctx.shadowBlur = 22;
           ctx.strokeStyle = `rgba(${c.glow},${a * 0.75})`;

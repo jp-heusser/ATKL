@@ -1,6 +1,7 @@
 /* Detecta si una URL se puede mostrar incrustada (reproductor) y cómo.
    Devuelve null si no: en ese caso el enlace se muestra como botón normal. */
-const ACCENT = 'ee2d3d';
+// Color del reproductor de SoundCloud: rojo en modo oscuro, celeste en modo claro.
+const accent = () => (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? '0a96dc' : 'ee2d3d');
 
 export function getEmbed(url) {
   let u;
@@ -35,7 +36,7 @@ export function getEmbed(url) {
     const clean = `https://soundcloud.com/${parts.join('/')}`;
     const src =
       `https://w.soundcloud.com/player/?url=${encodeURIComponent(clean)}` +
-      `&color=%23${ACCENT}&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`;
+      `&color=%23${accent()}&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=false`;
     return { type: 'soundcloud', name: 'SoundCloud', src, height: tall ? 352 : 166 };
   }
 
