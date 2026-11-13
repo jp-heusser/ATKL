@@ -1,3 +1,4 @@
+import { link } from '../router.js';
 import { isValidLink } from '../platforms.js';
 import { LinkItem } from './LinkButton.jsx';
 import SocialIcons from './SocialIcons.jsx';
@@ -42,7 +43,7 @@ export default function Home({ label, artists }) {
           <ul className="artist-list">
             {artists.map((a) => (
               <li key={a.slug}>
-                <a className="artist-row" href={`#${a.slug}`}>
+                <a className="artist-row" href={link(a.slug)}>
                   <Avatar artist={a} size={40} />
                   <span className="artist-text">
                     <span className="artist-name">{a.name}</span>

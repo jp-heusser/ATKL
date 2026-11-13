@@ -1,3 +1,4 @@
+import { link, absoluteLink } from '../router.js';
 import { useEffect, useState } from 'react';
 import { isValidLink } from '../platforms.js';
 import { LinkItem } from './LinkButton.jsx';
@@ -20,7 +21,7 @@ export default function ArtistPage({ artist }) {
   const empty = !links.length && !(artist.socials || []).filter(isValidLink).length;
 
   const copy = async () => {
-    const url = `${location.origin}${location.pathname}#${artist.slug}`;
+    const url = absoluteLink(artist.slug);
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -33,7 +34,7 @@ export default function ArtistPage({ artist }) {
   return (
     <main className="page">
       <nav className="back">
-        <a href="#">← ATKL Records</a>
+        <a href={link('')}>← ATKL Records</a>
       </nav>
 
       <header className="artist-head">

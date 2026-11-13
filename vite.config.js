@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// base './' = rutas relativas: funciona en GitHub Pages (/ATKL-LINKS/),
-// en un dominio propio y en cualquier hosting estático sin cambiar nada.
+// Normal (Vercel, desarrollo): base '/' y direcciones limpias tipo /nombre-artista.
+// Solo estático (GitHub Pages, VITE_STATIC_ONLY=true): base './' para que funcione en /ATKL-LINKS/.
 export default defineConfig({
-  base: './',
+  base: process.env.VITE_STATIC_ONLY === 'true' ? './' : '/',
   plugins: [react()],
   // En desarrollo, /api va a la API local (npm run server).
   server: { proxy: { '/api': 'http://localhost:3001' } },

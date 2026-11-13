@@ -1,4 +1,5 @@
 /* Panel: el artista edita su perfil; el admin edita el sello, los artistas y crea cuentas. */
+import { link } from '../router.js';
 import { useEffect, useState } from 'react';
 import { api, setToken } from '../api.js';
 import LinksEditor from './LinksEditor.jsx';
@@ -77,7 +78,7 @@ function ArtistForm({ initial, onSave, admin, onSaved, photoPath }) {
       )}
       <Status s={s} />
       <button className="btn-primary" disabled={s.busy}>{s.busy ? 'Guardando…' : 'Guardar cambios'}</button>
-      {a.slug && <a className="form-hint" href={`#${a.slug}`}>Ver mi página →</a>}
+      {a.slug && <a className="form-hint" href={link(a.slug)}>Ver mi página →</a>}
     </form>
   );
 }
@@ -244,7 +245,7 @@ export default function Panel({ user, onLogout, onChanged }) {
   return (
     <main className="page">
       <nav className="back panel-bar">
-        <a href="#">← ATKL Records</a>
+        <a href={link('')}>← ATKL Records</a>
         <button type="button" className="btn-link" onClick={logout}>Cerrar sesión</button>
       </nav>
       <h1 className="form-title">{admin ? 'Administración' : 'Mi perfil'}</h1>

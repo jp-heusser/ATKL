@@ -1,3 +1,4 @@
+import { link } from '../router.js';
 import { useState } from 'react';
 import { api, setToken } from '../api.js';
 
@@ -25,7 +26,7 @@ export default function Login({ onLogin }) {
   return (
     <main className="page">
       <nav className="back">
-        <a href="#">← ATKL Records</a>
+        <a href={link('')}>← ATKL Records</a>
       </nav>
       <form className="card form" onSubmit={submit}>
         <h1 className="form-title">Acceso</h1>

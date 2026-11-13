@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useHub } from './useHub.js';
 import { api, getToken, setToken, USE_API } from './api.js';
+import { useRoute, navigate, link } from './router.js';
 import Lightning from './components/Lightning.jsx';
 import Home from './components/Home.jsx';
 import ArtistPage from './components/ArtistPage.jsx';
@@ -16,21 +17,12 @@ const savedTheme = () => {
   }
 };
 
-// Rutas por hash: #slug → artista · #acceso → login · #panel → edición
-const currentSlug = () => decodeURIComponent(location.hash.replace(/^#\/?/, ''));
-
 export default function App() {
   const { label, artists, reload } = useHub();
-  const [slug, setSlug] = useState(currentSlug);
+  const slug = useRoute(); // 'desmont-landvik', 'acceso', 'panel' o '' (inicio)
   const [theme, setTheme] = useState(savedTheme);
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(() => USE_API && !!getToken());
-
-  useEffect(() => {
-    const onHash = () => setSlug(currentSlug());
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
-  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -55,8 +47,8 @@ export default function App() {
   let view;
   if (isPanel) {
     if (checking) view = <main className="page" />;
-    else if (user) view = <Panel user={user} onLogout={() => { setUser(null); location.hash = ''; }} onChanged={reload} />;
-    else view = <Login onLogin={(u) => { setUser(u); location.hash = 'panel'; }} />;
+    else if (user) view = <Panel user={user} onLogout={() => { setUser(null); navigate(''); }} onChanged={reload} />;
+    else view = <Login onLogin={(u) => { setUser(u); navigate('panel'); }} />;
   } else {
     view = artist ? <ArtistPage artist={artist} /> : <Home label={label} artists={artists} />;
   }
@@ -84,10 +76,10 @@ export default function App() {
       </button>
       {view}
       <footer className="site-footer">
-        <a href="#">ATKL Records</a> · {new Date().getFullYear()}
+        <a href={link('')}>ATKL Records</a> · {new Date().getFullYear()}
         {USE_API && !isPanel && (
           <>
-            {' '}· <a href={user ? '#panel' : '#acceso'}>{user ? 'Mi panel' : 'Acceso'}</a>
+            {' '}· <a href={link(user ? 'panel' : 'acceso')}>{user ? 'Mi panel' : 'Acceso'}</a>
           </>
         )}
       </footer>

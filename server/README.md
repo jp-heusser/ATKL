@@ -54,10 +54,14 @@ npm run create-user -- admin correo@dominio.cl
 
 Muestra una contraseña temporal; cámbiala al entrar. Las cuentas de artistas se crean desde el panel (pestaña Artistas) o con `npm run create-user -- artist correo slug-del-artista`.
 
+## Direcciones de la web
+
+Cada artista tiene una dirección limpia: `tusitio.com/slug` (por ejemplo `/desmont-landvik`). No usa `#`, porque Instagram lo convierte en `%23` al pegar el link en la bio. Los links antiguos (`/#slug`) y los que Instagram rompió (`/%23slug`) se siguen entendiendo y se corrigen solos. `vercel.json` envía cualquier ruta que no sea archivo ni `/api` a la web.
+
 ## Panel en la web
 
-- `…/#acceso` — login.
-- `…/#panel` — el artista edita su perfil y enlaces; el admin edita el sello, cualquier artista, crea artistas y cuentas.
+- `/acceso` — login.
+- `/panel` — el artista edita su perfil y enlaces; el admin edita el sello, cualquier artista, crea artistas y cuentas.
 
 El enlace "Acceso" aparece al pie de la web solo cuando hay API configurada.
 

@@ -3,7 +3,7 @@ import { linkSchema } from './shared.js';
 
 const artistSchema = new mongoose.Schema(
   {
-    // Identificador de su página: …/#slug
+    // Identificador de su página: tusitio.com/slug
     slug: {
       type: String,
       required: true,
@@ -13,7 +13,7 @@ const artistSchema = new mongoose.Schema(
       match: [/^[a-z0-9]+(-[a-z0-9]+)*$/, 'El slug solo admite minúsculas, números y guiones'],
       maxlength: 60,
       // nombres reservados por las pantallas de la web
-      validate: { validator: (v) => !['acceso', 'panel'].includes(v), message: 'Ese slug está reservado' },
+      validate: { validator: (v) => !['acceso', 'panel', 'api', 'assets', 'index'].includes(v), message: 'Ese slug está reservado' },
     },
     name: { type: String, required: true, trim: true, maxlength: 80 },
     role: { type: String, trim: true, default: '', maxlength: 80 },
