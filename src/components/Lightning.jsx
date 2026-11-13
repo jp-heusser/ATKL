@@ -1,5 +1,5 @@
 /* Fondo de rayos interactivo (canvas 2D, sin librerías).
-   - Cada pocos segundos cae un rayo ramificado desde arriba, con un destello suave.
+   - Cada pocos segundos cae un rayo celeste ramificado desde arriba, con un destello suave.
    - Un clic o toque hace caer un rayo justo en ese punto, con chispas.
    - En escritorio, el cursor suelta pequeños arcos eléctricos al moverse.
    Se pausa con la pestaña oculta y se desactiva con "reducir movimiento".
@@ -8,7 +8,13 @@
 const MIN_GAP = 1400; // ms mínimo entre rayos automáticos
 const MAX_GAP = 4200; // ms máximo entre rayos automáticos
 const FLASH = 0.07; // intensidad del destello de pantalla (0 = sin destello)
-const RED = '238,45,61';
+
+// Colores del rayo (R,G,B) según el tema. Celeste.
+const COLORS = {
+  dark: { glow: '70,195,255', core: '235,250,255', flash: '220,244,255', spark: '120,215,255' },
+  light: { glow: '0,150,235', core: '0,92,170', flash: null, spark: '0,120,210' }, // sin destello sobre fondo claro
+};
+const palette = () => COLORS[document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'];
 
 import { useEffect, useRef } from 'react';
 
@@ -87,14 +93,15 @@ export default function Lightning() {
 
       ctx.clearRect(0, 0, w, h);
       if (!bolts.length && !sparks.length) return;
+      const c = palette();
 
       for (let i = bolts.length - 1; i >= 0; i--) {
         const b = bolts[i];
         // parpadeo irregular mientras se apaga
         const a = b.life * (b.life > 0.5 ? rand(0.55, 1) : 1);
 
-        if (b.flash && b.life > 0.75) {
-          ctx.fillStyle = `rgba(255,235,238,${b.flash * b.life})`;
+        if (b.flash && c.flash && b.life > 0.75) {
+          ctx.fillStyle = `rgba(${c.flash},${b.flash * b.life})`;
           ctx.fillRect(0, 0, w, h);
         }
 
@@ -102,15 +109,15 @@ export default function Lightning() {
           ctx.beginPath();
           ctx.moveTo(pts[0][0], pts[0][1]);
           for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]);
-          // resplandor rojo
-          ctx.shadowColor = `rgba(${RED},${a})`;
+          // resplandor celeste
+          ctx.shadowColor = `rgba(${c.glow},${a})`;
           ctx.shadowBlur = 22;
-          ctx.strokeStyle = `rgba(${RED},${a * 0.75})`;
+          ctx.strokeStyle = `rgba(${c.glow},${a * 0.75})`;
           ctx.lineWidth = width * 3.2;
           ctx.stroke();
-          // núcleo blanco
+          // núcleo
           ctx.shadowBlur = 8;
-          ctx.strokeStyle = `rgba(255,255,255,${a})`;
+          ctx.strokeStyle = `rgba(${c.core},${a})`;
           ctx.lineWidth = width;
           ctx.stroke();
         }
@@ -130,7 +137,7 @@ export default function Lightning() {
           sparks.splice(i, 1);
           continue;
         }
-        ctx.fillStyle = `rgba(${s.c},${s.life})`;
+        ctx.fillStyle = `rgba(${s.core ? c.core : c.spark},${s.life})`;
         ctx.fillRect(s.x, s.y, s.size, s.size);
       }
     };
@@ -148,7 +155,7 @@ export default function Lightning() {
           vy: Math.sin(ang) * sp - 1.5,
           life: 1,
           size: rand(1.5, 3),
-          c: Math.random() < 0.6 ? RED : '255,255,255',
+          core: Math.random() < 0.4,
         });
       }
     };

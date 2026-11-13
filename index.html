@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="dark" style="background:#000">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -25,7 +25,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
-  <body style="background:#000">
+  <body>
+    <script>
+      // Tema antes de pintar: oscuro por defecto; claro solo si se eligió con el botón.
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('atkl_theme') === 'light' ? 'light' : 'dark';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
     <div id="root"></div>
     <noscript>
       <p style="padding:24px;font-family:sans-serif;color:#eee;background:#080808">

@@ -6,8 +6,47 @@
   --line: #2e2e2e;
   --hover: #0f0f0f;
   --accent: #ee2d3d;
+  --border: #4a4a4a; /* bordes de botones y tarjetas */
+  --panel: rgba(8, 8, 8, 0.82); /* fondo de botones */
+  --card: rgba(8, 8, 8, 0.9); /* fondo de formularios */
+  --input: #000;
+  --strong: #fff;
+  --soft: #d0d0d0;
+  --faint: #8a8a8a;
+  --avatar: #111;
+  --inv-bg: #fff; /* botón al pasar el cursor: colores invertidos */
+  --inv-fg: #000;
+  --inv-mute: #444;
+  --vignette: rgba(0, 0, 0, 0.55);
+  --err: #ff8a93;
+  --ok: #b9f5c8;
   --font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --display: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
+}
+
+/* Modo claro. El sitio abre SIEMPRE en oscuro; el claro solo se activa con el botón
+   de la esquina (no sigue la preferencia del sistema). */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f4f4f1;
+  --fg: #0a0a0a;
+  --mute: #585858;
+  --line: #d4d4d0;
+  --hover: #e8e8e4;
+  --border: #9c9c98;
+  --panel: rgba(255, 255, 255, 0.86);
+  --card: rgba(255, 255, 255, 0.95);
+  --input: #fff;
+  --strong: #000;
+  --soft: #2e2e2e;
+  --faint: #777;
+  --avatar: #e2e2de;
+  --inv-bg: #0a0a0a;
+  --inv-fg: #fff;
+  --inv-mute: #bdbdbd;
+  --vignette: rgba(244, 244, 241, 0.6);
+  --err: #b3121f;
+  --ok: #136b32;
 }
 
 * {
@@ -16,7 +55,7 @@
   padding: 0;
 }
 html {
-  background: var(--bg);
+  background: var(--bg) !important; /* pisa el negro inicial de index.html */
 }
 body {
   min-height: 100vh;
@@ -195,7 +234,7 @@ button:focus-visible {
   flex: none;
   border-radius: 50%;
   object-fit: cover;
-  background: #111;
+  background: var(--avatar);
   border: 1px solid var(--line);
 }
 .avatar-initials {
@@ -253,7 +292,7 @@ button:focus-visible {
   transition: border-color 0.15s, background 0.15s;
 }
 .link-btn:hover {
-  border-color: #3a3a3a;
+  border-color: var(--border);
   background: var(--hover);
 }
 .link-text {
@@ -320,7 +359,7 @@ button:focus-visible {
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #555;
+  color: var(--faint);
 }
 .site-footer a:hover {
   color: var(--fg);
@@ -346,7 +385,7 @@ body::before {
   pointer-events: none;
   background:
     radial-gradient(ellipse 70% 38% at 50% 0%, rgba(238, 45, 61, 0.26), transparent 70%),
-    radial-gradient(ellipse 90% 60% at 50% 55%, rgba(0, 0, 0, 0.55), transparent 80%);
+    radial-gradient(ellipse 90% 60% at 50% 55%, var(--vignette), transparent 80%);
 }
 .page,
 .site-footer {
@@ -387,7 +426,7 @@ body::before {
   text-shadow: 0 0 24px rgba(238, 45, 61, 0.45);
 }
 .label-bio {
-  color: #d0d0d0;
+  color: var(--soft);
 }
 .label-socials a {
   color: var(--fg);
@@ -414,8 +453,8 @@ body::before {
 .link-btn {
   position: relative;
   overflow: hidden;
-  background: rgba(8, 8, 8, 0.82);
-  border: 1px solid #4a4a4a;
+  background: var(--panel);
+  border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   border-radius: 4px;
   backdrop-filter: blur(3px);
@@ -436,9 +475,9 @@ body::before {
 }
 .link-btn:hover,
 .link-btn:focus-visible {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: var(--inv-bg);
+  color: var(--inv-fg);
+  border-color: var(--inv-bg);
   border-left-color: var(--accent);
   transform: translateX(4px);
   box-shadow: -6px 0 0 var(--accent), 0 0 28px rgba(238, 45, 61, 0.35);
@@ -453,7 +492,7 @@ body::before {
   font-weight: 700;
 }
 .link-btn:hover .link-detail {
-  color: #444;
+  color: var(--inv-mute);
 }
 .link-btn .link-arrow {
   color: var(--accent);
@@ -461,14 +500,14 @@ body::before {
   transition: transform 0.18s;
 }
 .link-btn:hover .link-arrow {
-  color: #000;
+  color: var(--inv-fg);
   transform: translate(3px, -3px);
 }
 
 /* Desplegable y perfil de artista con el mismo lenguaje */
 .artists-box {
-  background: rgba(8, 8, 8, 0.82);
-  border-color: #4a4a4a;
+  background: var(--panel);
+  border-color: var(--border);
   border-radius: 4px;
   backdrop-filter: blur(3px);
 }
@@ -489,7 +528,7 @@ body::before {
   box-shadow: 0 0 26px rgba(238, 45, 61, 0.45);
 }
 .site-footer {
-  color: #8a8a8a;
+  color: var(--faint);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -503,8 +542,8 @@ body::before {
    Acceso y panel de edición
    ============================================================ */
 .card {
-  background: rgba(8, 8, 8, 0.9);
-  border: 1px solid #4a4a4a;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 4px;
   padding: 18px 16px;
   margin-top: 14px;
@@ -550,9 +589,9 @@ a.form-hint:hover {
 .form select,
 .form textarea {
   width: 100%;
-  background: #000;
+  background: var(--input);
   color: var(--fg);
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--border);
   border-radius: 3px;
   padding: 10px;
   font: 15px var(--font);
@@ -584,8 +623,8 @@ a.form-hint:hover {
   transition: background 0.15s, color 0.15s;
 }
 .btn-primary:hover {
-  background: #fff;
-  color: #000;
+  background: var(--inv-bg);
+  color: var(--inv-fg);
 }
 .btn-primary:disabled {
   opacity: 0.5;
@@ -594,7 +633,7 @@ a.form-hint:hover {
 .btn-ghost {
   background: none;
   color: var(--fg);
-  border: 1px dashed #4a4a4a;
+  border: 1px dashed var(--border);
   border-radius: 3px;
   padding: 10px;
   font: 13px var(--font);
@@ -628,18 +667,18 @@ a.form-hint:hover {
   border-left: 3px solid;
 }
 .msg-error {
-  color: #ff8a93;
+  color: var(--err);
   border-color: var(--accent);
   background: rgba(238, 45, 61, 0.12);
 }
 .msg-ok {
-  color: #b9f5c8;
+  color: var(--ok);
   border-color: #3ecf6a;
   background: rgba(62, 207, 106, 0.1);
 }
 .msg code {
   font: 600 14px ui-monospace, Consolas, monospace;
-  color: #fff;
+  color: var(--strong);
   user-select: all;
 }
 .links-editor {
@@ -686,7 +725,7 @@ a.form-hint:hover {
   cursor: pointer;
 }
 .le-actions button:hover:not(:disabled) {
-  color: #fff;
+  color: var(--strong);
   border-color: var(--accent);
 }
 .le-actions button:disabled {
@@ -702,7 +741,7 @@ a.form-hint:hover {
   flex: 1;
   background: none;
   color: var(--mute);
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--border);
   border-radius: 3px;
   padding: 10px;
   font: 700 12px var(--font);
@@ -711,9 +750,9 @@ a.form-hint:hover {
   cursor: pointer;
 }
 .tabs button[aria-selected='true'] {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: var(--inv-bg);
+  color: var(--inv-fg);
+  border-color: var(--inv-bg);
 }
 details.card summary {
   cursor: pointer;
@@ -770,10 +809,10 @@ details.card[open] summary {
 /* Reproductores incrustados (YouTube, SoundCloud, Instagram) dentro de la lista de enlaces */
 .embed {
   margin: 4px 0;
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--border);
   border-left: 3px solid var(--accent);
   border-radius: 4px;
-  background: rgba(8, 8, 8, 0.82);
+  background: var(--panel);
   overflow: hidden;
 }
 .embed-caption {
@@ -821,4 +860,46 @@ details.card[open] summary {
   letter-spacing: 0.04em !important;
   text-transform: none !important;
   color: var(--fg) !important;
+}
+
+/* ---------- Modo claro: ajustes puntuales ---------- */
+:root[data-theme='light'] .logo-wrap .logo {
+  /* el logo es blanco: se invierte a negro */
+  filter: invert(1) drop-shadow(0 0 14px rgba(238, 45, 61, 0.3));
+}
+:root[data-theme='light'] .logo-ghost {
+  display: none;
+}
+:root[data-theme='light'] body::before {
+  background:
+    radial-gradient(ellipse 70% 38% at 50% 0%, rgba(238, 45, 61, 0.16), transparent 70%),
+    radial-gradient(ellipse 90% 60% at 50% 55%, var(--vignette), transparent 80%);
+}
+:root[data-theme='light'] .label-name,
+:root[data-theme='light'] .artist-title {
+  text-shadow: none;
+}
+
+/* Botón de tema (esquina superior derecha) */
+.theme-toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+  transition: color 0.15s, border-color 0.15s, transform 0.15s;
+}
+.theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: rotate(20deg);
 }
