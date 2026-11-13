@@ -4,7 +4,7 @@ import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
 import User from '../models/User.js';
 import { requireAuth, requireAdmin, hashPassword, tempPassword } from '../auth.js';
-import { assign, cleanLinks, linksWithLegacy } from '../util.js';
+import { assign, cleanLinks, cleanSocials, plainLinks, linksWithLegacy } from '../util.js';
 import { savePhoto, removePhoto } from '../photos.js';
 
 const router = Router();
@@ -14,6 +14,7 @@ const ARTIST_TEXT = ['name', 'role', 'city']; // la foto se sube aparte
 
 function applyArtist(artist, body) {
   assign(artist, body, ARTIST_TEXT);
+  if (body.socials !== undefined) artist.socials = cleanSocials(body.socials);
   if (body.links !== undefined) {
     artist.links = cleanLinks(body.links);
     artist.instagram = []; // ya vienen dentro de links
@@ -48,7 +49,7 @@ router.get('/artists', async (_req, res) => {
   res.json(
     artists.map((a) => ({
       slug: a.slug, name: a.name, role: a.role, city: a.city, photo: a.photo,
-      links: linksWithLegacy(a), active: a.active, order: a.order, account: account.get(String(a._id)) || null,
+      socials: plainLinks(a.socials), links: linksWithLegacy(a), active: a.active, order: a.order, account: account.get(String(a._id)) || null,
     })),
   );
 });

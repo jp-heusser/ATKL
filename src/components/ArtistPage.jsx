@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { isValidLink } from '../platforms.js';
 import { LinkItem } from './LinkButton.jsx';
 import Avatar from './Avatar.jsx';
+import SocialIcons from './SocialIcons.jsx';
 
 export default function ArtistPage({ artist }) {
   const [copied, setCopied] = useState(false);
@@ -13,6 +14,10 @@ export default function ArtistPage({ artist }) {
       document.title = 'ATKL Records';
     };
   }, [artist]);
+
+  // Sin enlaces ni íconos de redes cargados: se muestra un aviso de mantención.
+  const links = (artist.links || []).filter(isValidLink);
+  const empty = !links.length && !(artist.socials || []).filter(isValidLink).length;
 
   const copy = async () => {
     const url = `${location.origin}${location.pathname}#${artist.slug}`;
@@ -37,13 +42,21 @@ export default function ArtistPage({ artist }) {
         {(artist.role || artist.city) && (
           <p className="artist-meta">{[artist.role, artist.city].filter(Boolean).join(' · ')}</p>
         )}
+        <SocialIcons links={artist.socials} label={`Redes de ${artist.name}`} />
       </header>
 
-      <div className="link-stack">
-        {artist.links.filter(isValidLink).map((entry, i) => (
-          <LinkItem key={i} entry={entry} />
-        ))}
-      </div>
+      {empty ? (
+        <div className="maintenance" role="status">
+          <span className="maintenance-tag">En mantención</span>
+          <p>Estamos preparando el perfil de {artist.name}. Vuelve pronto para ver sus enlaces.</p>
+        </div>
+      ) : (
+        <div className="link-stack">
+          {links.map((entry, i) => (
+            <LinkItem key={i} entry={entry} />
+          ))}
+        </div>
+      )}
 
       <button type="button" className="copy-btn" onClick={copy}>
         {copied ? 'Link copiado ✓' : 'Copiar link de este perfil'}

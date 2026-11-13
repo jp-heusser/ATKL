@@ -4,7 +4,7 @@ import { api, setToken } from '../api.js';
 import LinksEditor from './LinksEditor.jsx';
 import PhotoField from './PhotoField.jsx';
 
-const blank = { name: '', role: '', city: '', photo: '', links: [] };
+const blank = { name: '', role: '', city: '', photo: '', socials: [], links: [] };
 
 function useSaver() {
   const [state, setState] = useState({ busy: false, ok: '', error: '' });
@@ -63,6 +63,9 @@ function ArtistForm({ initial, onSave, admin, onSaved, photoPath }) {
         <label>Rol<input maxLength={80} placeholder="DJ / Productor" {...field('role')} /></label>
         <label>Ciudad<input maxLength={60} {...field('city')} /></label>
       </div>
+      <span className="form-label">Íconos de redes</span>
+      <p className="form-hint">Aparecen como íconos pequeños bajo tu nombre.</p>
+      <LinksEditor links={a.socials || []} onChange={(socials) => setA({ ...a, socials })} allowEmbed={false} labelPlaceholder="Nombre (opcional, para accesibilidad)" />
       <span className="form-label">Enlaces y reproductores</span>
       <p className="form-hint">El orden de esta lista es el orden en tu página: usa ↑ ↓. Los enlaces de YouTube, SoundCloud o un post de Instagram pueden mostrarse incrustados.</p>
       <LinksEditor links={a.links} onChange={(links) => setA({ ...a, links })} />

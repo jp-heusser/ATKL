@@ -906,3 +906,24 @@ details.card[open] summary {
   border-color: var(--accent);
   transform: rotate(20deg);
 }
+
+/* Aviso de perfil sin información */
+.maintenance {
+  text-align: center;
+  padding: 28px 20px;
+  background: var(--panel);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  color: var(--soft);
+}
+.maintenance-tag {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 12px;
+  background: var(--accent);
+  color: #fff;
+  font: 700 11px var(--font);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}

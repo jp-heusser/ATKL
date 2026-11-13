@@ -33,7 +33,7 @@ try {
   for (const a of artists) {
     const r = await Artist.updateOne(
       { slug: a.slug },
-      { $setOnInsert: { name: a.name, role: a.role || '', city: a.city || '', photo: a.photo || '', links: a.links.map(toLink), order: base + added, active: true, owner: null } },
+      { $setOnInsert: { name: a.name, role: a.role || '', city: a.city || '', photo: a.photo || '', socials: (a.socials || []).map(toLink), links: a.links.map(toLink), order: base + added, active: true, owner: null } },
       opts,
     );
     if (r.upsertedCount) added++;

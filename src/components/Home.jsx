@@ -1,11 +1,11 @@
-import { resolveLink, isValidLink } from '../platforms.js';
-import { LinkItem, PlatformIcon } from './LinkButton.jsx';
+import { isValidLink } from '../platforms.js';
+import { LinkItem } from './LinkButton.jsx';
+import SocialIcons from './SocialIcons.jsx';
 import Avatar from './Avatar.jsx';
 
 const LOGO = `${import.meta.env.BASE_URL}logo-atkl.webp`;
 
 export default function Home({ label, artists }) {
-  const socials = label.socials.filter(isValidLink).map(resolveLink);
   const links = label.links.filter(isValidLink);
 
   return (
@@ -17,19 +17,7 @@ export default function Home({ label, artists }) {
         </div>
         <h1 className="label-name">{label.name}</h1>
         <p className="label-bio">{label.bio}</p>
-        <nav className="label-socials" aria-label="Redes de ATKL Records">
-          {socials.map((l) => (
-            <a
-              key={l.url}
-              href={l.url}
-              aria-label={l.name}
-              title={l.name}
-              {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-            >
-              <PlatformIcon icon={l.icon} badge={l.badge} size={19} />
-            </a>
-          ))}
-        </nav>
+        <SocialIcons links={label.socials} label="Redes de ATKL Records" />
       </header>
 
       <div className="link-stack">

@@ -19,6 +19,10 @@ export function cleanLinks(list, { keepEmptyUrl = false } = {}) {
   return out;
 }
 
+// Íconos de redes: nunca van incrustados.
+export const cleanSocials = (list) => cleanLinks(list).map((e) => ({ ...e, embed: false }));
+export const plainLinks = (list) => (list || []).map((l) => ({ url: l.url, label: l.label || '', icon: l.icon || '', embed: false }));
+
 // Compatibilidad: los "destacados de Instagram" de la versión anterior (campo artist.instagram)
 // se muestran como enlaces incrustados al final de la lista.
 export function linksWithLegacy(artist) {

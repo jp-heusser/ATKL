@@ -19,6 +19,8 @@ const artistSchema = new mongoose.Schema(
     role: { type: String, trim: true, default: '', maxlength: 80 },
     city: { type: String, trim: true, default: '', maxlength: 60 },
     photo: { type: String, trim: true, default: '', maxlength: 500 }, // ruta en public/ o URL https
+    // Íconos de redes bajo el nombre (igual que los del sello).
+    socials: { type: [linkSchema], default: [], validate: [(v) => v.length <= 10, 'Máximo 10 íconos de redes'] },
     links: { type: [linkSchema], default: [], validate: [(v) => v.length <= 30, 'Máximo 30 enlaces'] },
     // Obsoleto: destacados de Instagram de una versión anterior. Ahora van en links con embed: true;
     // se migran solos la próxima vez que se guarda el perfil.

@@ -6,8 +6,8 @@ import Photo from '../models/Photo.js';
 import { linksWithLegacy } from '../util.js';
 
 const router = Router();
-const ARTIST_FIELDS = 'slug name role city photo links instagram order -_id';
-const present = ({ instagram, ...a }) => ({ ...a, links: linksWithLegacy({ links: a.links, instagram }) });
+const ARTIST_FIELDS = 'slug name role city photo socials links instagram order -_id';
+const present = ({ instagram, ...a }) => ({ ...a, socials: a.socials || [], links: linksWithLegacy({ links: a.links, instagram }) });
 
 router.get('/health', (_req, res) => res.json({ ok: true }));
 
