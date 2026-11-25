@@ -45,3 +45,26 @@ export async function compressImage(file, maxSide = 1600, quality = 0.82) {
   bmp.close?.();
   return canvas.toDataURL('image/jpeg', quality);
 }
+
+// Recorta al centro a una proporción fija (16:9 por defecto) y reduce → dataURL JPEG.
+export async function cropImage(file, ratio = 16 / 9, width = 1600, quality = 0.84) {
+  if (!file.type.startsWith('image/')) throw new Error('Elige una imagen (JPG, PNG o WebP)');
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }).catch(() => null);
+  if (!bmp) throw new Error('No se pudo leer la imagen');
+  let sw = bmp.width;
+  let sh = Math.round(sw / ratio);
+  if (sh > bmp.height) {
+    sh = bmp.height;
+    sw = Math.round(sh * ratio);
+  }
+  const w = Math.min(width, sw);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = Math.round(w / ratio);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bmp, (bmp.width - sw) / 2, (bmp.height - sh) / 2, sw, sh, 0, 0, canvas.width, canvas.height);
+  bmp.close?.();
+  return canvas.toDataURL('image/jpeg', quality);
+}

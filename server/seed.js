@@ -14,6 +14,9 @@ import Order from './models/Order.js';
 import Proof from './models/Proof.js';
 import Ticket from './models/Ticket.js';
 import Photo from './models/Photo.js';
+import EventImage from './models/EventImage.js';
+import { events } from './data/events.js';
+import { saveEventImage, checkImageBuffer } from './photos.js';
 import { label } from '../src/data/label.js';
 import { artists } from '../src/data/artists.js';
 
@@ -47,8 +50,29 @@ try {
   }
 
   // Crea las colecciones e índices (incluida "users", aún vacía).
+  // Eventos de server/data/events.js: solo se crean si no existen.
+  for (const e of events) {
+    const { imageUrl, ...data } = e;
+    let ev = await Event.findOne({ slug: e.slug });
+    const isNew = !ev;
+    if (isNew) ev = await Event.create({ ...data, startsAt: new Date(e.startsAt) });
+    let img = '';
+    if (imageUrl && !ev.image) {
+      try {
+        const r = await fetch(imageUrl, { signal: AbortSignal.timeout(20000) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        await saveEventImage(ev, checkImageBuffer(Buffer.from(await r.arrayBuffer()), r.headers.get('content-type')));
+        await ev.save();
+        img = ' + imagen descargada';
+      } catch (err) {
+        img = ` (no se pudo descargar la imagen: ${err.message}; súbela desde el panel)`;
+      }
+    }
+    console.log(`Evento: ${ev.title} → ${isNew ? 'creado' : 'ya existía, sin cambios'}${img}`);
+  }
+
   // Crea todas las colecciones e índices (también las de entradas, aunque estén vacías).
-  const models = [Label, Artist, User, Photo, Event, TicketType, Order, Proof, Ticket];
+  const models = [Label, Artist, User, Photo, Event, EventImage, TicketType, Order, Proof, Ticket];
   for (const M of models) {
     await M.createCollection().catch((e) => {
       if (e?.codeName !== 'NamespaceExists') throw e;

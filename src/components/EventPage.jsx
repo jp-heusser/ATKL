@@ -4,6 +4,7 @@ import { api } from '../api.js';
 import { link, navigate } from '../router.js';
 import { clp, fullDate, compressImage } from '../format.js';
 import { rememberOrder } from './OrderPage.jsx';
+import { photoUrl } from './Avatar.jsx';
 
 function CopyValue({ label, value }) {
   const [done, setDone] = useState(false);
@@ -100,6 +101,7 @@ export default function EventPage({ slug }) {
     <main className="page">
       <nav className="back"><a href={link('')}>← ATKL Records</a></nav>
 
+      {event.image && <img className="ev-hero" src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} width="1600" height="900" />}
       <header className="event-head">
         <span className="event-kicker">Entradas</span>
         <h1 className="artist-title">{event.title}</h1>
@@ -108,12 +110,22 @@ export default function EventPage({ slug }) {
         {event.description && <p className="event-desc">{event.description}</p>}
       </header>
 
+      {event.onSale && event.ticketUrl && (
+        <a className="btn-primary ext-buy" href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
+          Comprar entradas en {(() => { try { return new URL(event.ticketUrl).hostname.replace(/^www\./, ''); } catch { return 'línea'; } })()} ↗
+        </a>
+      )}
+
       {!event.onSale ? (
         <div className="maintenance"><span className="maintenance-tag">Venta cerrada</span><p>La venta de entradas para este evento terminó.</p></div>
+      ) : types.length === 0 ? (
+        !event.ticketUrl && <div className="maintenance"><span className="maintenance-tag">Pronto</span><p>La venta abre muy pronto. Síguenos en Instagram para enterarte.</p></div>
       ) : !payReady ? (
+        event.ticketUrl ? null :
         <div className="maintenance"><span className="maintenance-tag">Pronto</span><p>La venta abre muy pronto. Síguenos en Instagram para enterarte.</p></div>
       ) : (
         <form className="buy" onSubmit={submit}>
+          {event.ticketUrl && <p className="form-hint center">O compra aquí pagando por transferencia:</p>}
           {/* 1. Entrada */}
           <section className="card form">
             <span className="step">1</span>

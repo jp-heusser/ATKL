@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, apiBlobUrl } from '../api.js';
 import { link } from '../router.js';
-import { clp, shortDateTime, toLocalInput, STATUS } from '../format.js';
+import { clp, shortDateTime, toLocalInput, STATUS, cropImage } from '../format.js';
+import { photoUrl } from './Avatar.jsx';
 import { useSaver, Status } from './ui.jsx';
 
 /* =========================================================
@@ -149,7 +150,41 @@ export function AdminOrders({ onChanged }) {
 /* =========================================================
    EVENTOS: datos del evento, tipos de entrada, transferencia, puerta
    ========================================================= */
-const blankEvent = { title: '', slug: '', startsAt: '', venue: '', address: '', city: '', description: '', status: 'draft' };
+const blankEvent = { title: '', slug: '', startsAt: '', venue: '', address: '', city: '', description: '', status: 'draft', ticketUrl: '' };
+
+// Imagen 16:9 del evento: se recorta al centro en el navegador (1600×900) y se guarda al instante.
+function EventImageField({ ev, onChanged }) {
+  const [img, setImg] = useState(ev.image);
+  const [s, run] = useSaver();
+  useEffect(() => setImg(ev.image), [ev.id, ev.image]);
+  const pick = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    run(async () => {
+      const r = await api(`/admin/events/${ev.id}/image`, { method: 'PUT', body: { image: await cropImage(file) } });
+      setImg(r.image);
+      onChanged();
+    }, 'Imagen guardada ✓');
+  };
+  const remove = () =>
+    run(async () => {
+      await api(`/admin/events/${ev.id}/image`, { method: 'DELETE' });
+      setImg('');
+      onChanged();
+    }, 'Imagen quitada ✓');
+  return (
+    <div className="form">
+      <span className="form-label">Imagen (16:9)</span>
+      <label className="file-drop ev-img-drop">
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} disabled={s.busy} />
+        {img ? <img src={photoUrl(img)} alt="Imagen del evento" /> : <span>{s.busy ? 'Subiendo…' : 'Elegir imagen'}</span>}
+      </label>
+      <p className="form-hint">Se recorta al centro en formato 16:9 (ideal 1600×900). {img && <button type="button" className="btn-link" onClick={remove}>Quitar imagen</button>}</p>
+      <Status s={s} />
+    </div>
+  );
+}
 
 function EventForm({ ev, onSaved }) {
   const [e, setE] = useState(ev ? { ...ev, startsAt: toLocalInput(ev.startsAt) } : blankEvent);
@@ -194,6 +229,8 @@ function EventForm({ ev, onSaved }) {
       </div>
       <label>Dirección<input maxLength={200} {...f('address')} /></label>
       <label>Descripción<textarea rows={4} maxLength={2000} {...f('description')} /></label>
+      <label>Link de venta externa (opcional)<input type="url" maxLength={500} placeholder="https://www.toliv.com/eventos/…" {...f('ticketUrl')} /></label>
+      <p className="form-hint">Si las entradas se venden en otra plataforma. Se muestra como botón; si además cargas tipos de entrada, también se puede pagar por transferencia.</p>
       <Status s={s} />
       <button className="btn-primary" disabled={s.busy}>{ev ? 'Guardar evento' : 'Crear evento'}</button>
       {ev && ev.status !== 'draft' && <a className="form-hint" href={link(`evento/${ev.slug}`)}>Ver página de venta →</a>}
@@ -379,6 +416,12 @@ export function AdminEvents({ onChanged }) {
         </label>
         <a className="btn-ghost center" href={link('puerta')}>Abrir escáner de puerta</a>
       </div>
+
+      {ev && (
+        <section className="card">
+          <EventImageField ev={ev} onChanged={() => { load(); onChanged?.(); }} />
+        </section>
+      )}
 
       <EventForm ev={ev} onSaved={saved} />
 

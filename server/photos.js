@@ -1,6 +1,7 @@
 /* Fotos de perfil: se guardan en MongoDB (colección "photos") y se sirven en /api/photos/:id.
    La web las recorta a 400×400 antes de subirlas, así que pesan poco (~30-60 kB). */
 import Photo from './models/Photo.js';
+import EventImage from './models/EventImage.js';
 
 const MAX_BYTES = 600 * 1024;
 
@@ -32,4 +33,27 @@ export async function savePhoto(artist, dataUrl) {
 export async function removePhoto(artist) {
   await Photo.deleteOne({ artist: artist._id });
   artist.photo = '';
+}
+
+/* ---------- Imagen de evento (16:9) ---------- */
+const EVENT_MAX = 1.5 * 1024 * 1024;
+
+// Guarda la imagen del evento (dataURL o Buffer ya validado) y deja su dirección en ev.image.
+export async function saveEventImage(ev, input) {
+  const { type, buffer } = typeof input === 'string' ? parseImage(input, EVENT_MAX) : input;
+  await EventImage.findOneAndUpdate({ event: ev._id }, { type, data: buffer }, { upsert: true });
+  ev.image = `/api/events/${ev._id}/image?v=${Date.now()}`;
+}
+
+export async function removeEventImage(ev) {
+  await EventImage.deleteOne({ event: ev._id });
+  ev.image = '';
+}
+
+// Para el script de carga: valida bytes descargados (formato real y tamaño).
+export function checkImageBuffer(buffer, contentType) {
+  const type = Object.keys(MAGIC).find((t) => MAGIC[t].every((b, i) => buffer[i] === b));
+  if (!type) throw bad('El archivo descargado no es una imagen JPG, PNG o WebP');
+  if (buffer.length > EVENT_MAX) throw bad('La imagen descargada pesa más de 1,5 MB');
+  return { type: type || contentType, buffer };
 }

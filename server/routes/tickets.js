@@ -7,6 +7,7 @@ import Order from '../models/Order.js';
 import Proof from '../models/Proof.js';
 import Ticket from '../models/Ticket.js';
 import Label from '../models/Label.js';
+import EventImage from '../models/EventImage.js';
 import { parseImage } from '../photos.js';
 import { sha256, newToken, newOrderCode, cleanDoc, bad, salesOpen } from '../tickets.js';
 
@@ -27,6 +28,8 @@ export const publicEvent = (e) => ({
   address: e.address,
   city: e.city,
   startsAt: e.startsAt,
+  image: e.image || '',
+  ticketUrl: e.ticketUrl || '',
   onSale: salesOpen(e),
 });
 
@@ -44,6 +47,15 @@ const publicType = (t) => ({
 router.get('/events', async (_req, res) => {
   const events = await Event.find({ ...VISIBLE, ...recent() }).sort({ startsAt: 1 }).limit(20).lean();
   res.json(events.map(publicEvent));
+});
+
+// Imagen del evento (pública; la dirección cambia con cada subida, así que se guarda en caché).
+router.get('/events/:id/image', async (req, res) => {
+  if (!/^[a-f0-9]{24}$/i.test(req.params.id)) return res.status(404).end();
+  const img = await EventImage.findOne({ event: req.params.id }).lean();
+  if (!img) return res.status(404).end();
+  res.set({ 'Content-Type': img.type, 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' });
+  res.send(Buffer.isBuffer(img.data) ? img.data : Buffer.from(img.data.buffer));
 });
 
 // Un evento con sus tipos de entrada y los datos para transferir.

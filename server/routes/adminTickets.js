@@ -9,6 +9,7 @@ import Label from '../models/Label.js';
 import User from '../models/User.js';
 import { requireAuth, requireAdmin, hashPassword, tempPassword } from '../auth.js';
 import { newTicketCode, bad } from '../tickets.js';
+import { saveEventImage, removeEventImage } from '../photos.js';
 
 const router = Router();
 router.use(requireAuth, requireAdmin);
@@ -48,6 +49,8 @@ router.get('/events', async (_req, res) => {
       city: e.city,
       startsAt: e.startsAt,
       status: e.status,
+      image: e.image || '',
+      ticketUrl: e.ticketUrl || '',
       pendingOrders: pend.get(String(e._id)) || 0,
       types: types.filter((t) => String(t.event) === String(e._id)).map(adminType),
     })),
@@ -55,7 +58,7 @@ router.get('/events', async (_req, res) => {
 });
 
 function applyEvent(ev, b) {
-  for (const f of ['title', 'description', 'venue', 'address', 'city']) {
+  for (const f of ['title', 'description', 'venue', 'address', 'city', 'ticketUrl']) {
     const v = str(b[f]);
     if (v !== undefined) ev[f] = v;
   }
@@ -80,6 +83,23 @@ router.put('/events/:id', async (req, res) => {
   applyEvent(ev, req.body || {});
   await ev.save();
   res.json({ ok: true });
+});
+
+// Imagen 16:9 del evento: { image: "data:image/jpeg;base64,…" } (la web la recorta antes de subirla).
+router.put('/events/:id/image', async (req, res) => {
+  const ev = await Event.findById(req.params.id);
+  if (!ev) return res.status(404).json({ error: 'Evento no encontrado' });
+  await saveEventImage(ev, req.body?.image);
+  await ev.save();
+  res.json({ image: ev.image });
+});
+
+router.delete('/events/:id/image', async (req, res) => {
+  const ev = await Event.findById(req.params.id);
+  if (!ev) return res.status(404).json({ error: 'Evento no encontrado' });
+  await removeEventImage(ev);
+  await ev.save();
+  res.json({ image: '' });
 });
 
 /* ===================== Tipos de entrada ===================== */

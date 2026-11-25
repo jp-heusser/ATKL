@@ -1149,3 +1149,22 @@ details.card[open] summary {
 a.btn-ghost { text-align: center; }
 .tt-option input[type='radio'] { width: auto !important; flex: none; padding: 0 !important; margin: 0; }
 .tt-text { text-align: left; }
+
+/* Imágenes de eventos: siempre 16:9 (aunque la original tenga otra proporción, se recorta al centro) */
+.ev-hero, .ev-img, .ev-img-drop img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: #000; }
+.ev-hero { border-radius: 6px; border: 1px solid var(--border); margin-bottom: 18px; box-shadow: 0 0 40px rgba(var(--accent-rgb), 0.25); }
+.event-card { flex-direction: column; align-items: stretch; gap: 0; padding: 0; overflow: hidden; }
+.ev-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; }
+.ev-img { border-bottom: 1px solid var(--border); }
+.ev-img-drop { padding: 0; aspect-ratio: 16 / 9; min-height: 0; }
+.ext-buy { display: block; text-align: center; margin: 0 0 18px; }
+.events > h2 {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
