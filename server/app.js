@@ -9,6 +9,9 @@ import publicRoutes from './routes/public.js';
 import authRoutes from './routes/auth.js';
 import meRoutes from './routes/me.js';
 import adminRoutes from './routes/admin.js';
+import ticketRoutes from './routes/tickets.js';
+import adminTicketRoutes from './routes/adminTickets.js';
+import doorRoutes from './routes/door.js';
 import { assertAuthConfig } from './auth.js';
 
 const app = express();
@@ -16,7 +19,7 @@ const app = express();
 // Orígenes que pueden llamar a la API (separados por coma). Vacío = cualquiera (solo lectura pública).
 const origins = (process.env.CORS_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean);
 app.use(cors(origins.length ? { origin: origins } : undefined));
-app.use(express.json({ limit: '1mb' })); // las fotos llegan en base64 (máx. 600 kB)
+app.use(express.json({ limit: '4mb' })); // fotos y comprobantes llegan en base64 (máx. 2 MB)
 app.disable('x-powered-by');
 
 app.set('trust proxy', 1); // IP real detrás del proxy del hosting (para el límite de intentos)
@@ -36,6 +39,9 @@ app.use(async (_req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/me', meRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminTicketRoutes);
+app.use('/api/door', doorRoutes);
+app.use('/api', ticketRoutes);
 app.use('/api', publicRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'No encontrado' }));
@@ -45,9 +51,10 @@ app.use((err, _req, res, _next) => {
     return res.status(400).json({ error: msg || 'Datos no válidos' });
   }
   if (err?.code === 11000) return res.status(409).json({ error: 'Ya existe un registro con ese valor (slug o correo)' });
-  if (err?.status === 400) return res.status(400).json({ error: err.message });
   if (err?.type === 'entity.too.large') return res.status(413).json({ error: 'La imagen es demasiado grande' });
   if (err?.type === 'entity.parse.failed') return res.status(400).json({ error: 'JSON no válido' });
+  if (err?.name === 'CastError') return res.status(404).json({ error: 'No encontrado' });
+  if (err?.status >= 400 && err.status < 500) return res.status(err.status).json({ error: err.message });
   console.error(err);
   res.status(500).json({ error: 'Error interno' });
 });

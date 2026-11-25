@@ -4,6 +4,8 @@ import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
 import Photo from '../models/Photo.js';
 import { linksWithLegacy } from '../util.js';
+import Event from '../models/Event.js';
+import { publicEvent } from './tickets.js';
 
 const router = Router();
 const ARTIST_FIELDS = 'slug name role city photo socials links instagram order -_id';
@@ -14,13 +16,14 @@ router.get('/health', (_req, res) => res.json({ ok: true }));
 // Todo lo que necesita la web en una sola llamada.
 router.get('/hub', async (_req, res, next) => {
   try {
-    const [label, artists] = await Promise.all([
+    const [label, artists, events] = await Promise.all([
       Label.findOne({ key: 'main' }).select('name bio socials links -_id').lean(),
       Artist.find({ active: true }).select(ARTIST_FIELDS).sort({ order: 1, name: 1 }).lean(),
+      Event.find({ status: { $in: ['published', 'closed'] }, startsAt: { $gte: new Date(Date.now() - 12 * 3600e3) } }).sort({ startsAt: 1 }).limit(6).lean(),
     ]);
     if (!label) return res.status(404).json({ error: 'Sin datos del sello. Ejecuta: npm run seed' });
     res.set('Cache-Control', 'public, max-age=60');
-    res.json({ label, artists: artists.map(present) });
+    res.json({ label, artists: artists.map(present), events: events.map(publicEvent) });
   } catch (e) {
     next(e);
   }

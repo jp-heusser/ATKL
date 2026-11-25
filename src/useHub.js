@@ -11,14 +11,14 @@ import { artists as localArtists } from './data/artists.js';
 import { API, USE_API } from './api.js';
 
 export function useHub() {
-  const [hub, setHub] = useState({ label: localLabel, artists: localArtists, source: 'local' });
+  const [hub, setHub] = useState({ label: localLabel, artists: localArtists, events: [], source: 'local' });
 
   const reload = useCallback(() => {
     if (!USE_API) return;
     fetch(`${API}/api/hub`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status))))
       .then((d) => {
-        if (d?.label && Array.isArray(d.artists)) setHub({ label: d.label, artists: d.artists, source: 'api' });
+        if (d?.label && Array.isArray(d.artists)) setHub({ label: d.label, artists: d.artists, events: d.events || [], source: 'api' });
       })
       .catch(() => {}); // sin API: se quedan los datos locales
   }, []);

@@ -8,6 +8,12 @@ import { connectDB } from './db.js';
 import Label from './models/Label.js';
 import Artist from './models/Artist.js';
 import User from './models/User.js';
+import Event from './models/Event.js';
+import TicketType from './models/TicketType.js';
+import Order from './models/Order.js';
+import Proof from './models/Proof.js';
+import Ticket from './models/Ticket.js';
+import Photo from './models/Photo.js';
 import { label } from '../src/data/label.js';
 import { artists } from '../src/data/artists.js';
 
@@ -41,7 +47,15 @@ try {
   }
 
   // Crea las colecciones e índices (incluida "users", aún vacía).
-  await Promise.all([Label.init(), Artist.init(), User.init(), User.createCollection()]);
+  // Crea todas las colecciones e índices (también las de entradas, aunque estén vacías).
+  const models = [Label, Artist, User, Photo, Event, TicketType, Order, Proof, Ticket];
+  for (const M of models) {
+    await M.createCollection().catch((e) => {
+      if (e?.codeName !== 'NamespaceExists') throw e;
+    });
+    await M.init();
+  }
+  console.log(`Colecciones e índices listos: ${models.map((M) => M.collection.collectionName).join(', ')}`);
   console.log('Listo.');
 } catch (e) {
   console.error('Error:', e.message);

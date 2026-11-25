@@ -1,6 +1,7 @@
 /* Crea una cuenta (o reinicia su contraseña) y muestra una contraseña temporal.
    Administrador:  npm run create-user -- admin correo@dominio.cl
-   Artista:        npm run create-user -- artist correo@dominio.cl slug-del-artista */
+   Artista:        npm run create-user -- artist correo@dominio.cl slug-del-artista
+   Puerta:         npm run create-user -- door correo@dominio.cl */
 import 'dotenv/config';
 import mongoose from 'mongoose';
 import { connectDB } from './db.js';
@@ -12,8 +13,8 @@ const [role, emailArg, slug] = process.argv.slice(2);
 const email = (emailArg || '').trim().toLowerCase();
 
 try {
-  if (!['admin', 'artist'].includes(role) || !email) {
-    throw new Error('Uso: npm run create-user -- admin correo   |   npm run create-user -- artist correo slug');
+  if (!['admin', 'artist', 'door'].includes(role) || !email) {
+    throw new Error('Uso: npm run create-user -- admin correo  |  artist correo slug  |  door correo');
   }
   await connectDB();
   let artist = null;

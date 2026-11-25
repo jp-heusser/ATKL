@@ -40,3 +40,7 @@ export function requireAdmin(req, res, next) {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Solo administradores' });
   next();
 }
+
+// Exige uno de los roles indicados (usar después de requireAuth).
+export const requireRole = (...roles) => (req, res, next) =>
+  roles.includes(req.user?.role) ? next() : res.status(403).json({ error: 'No tienes permiso para esto' });

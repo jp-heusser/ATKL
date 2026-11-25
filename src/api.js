@@ -41,3 +41,11 @@ export async function api(path, { method = 'GET', body } = {}) {
   }
   return data;
 }
+
+// Descarga un archivo protegido (p. ej. un comprobante) y devuelve una URL local para mostrarlo.
+export async function apiBlobUrl(path) {
+  const token = getToken();
+  const res = await fetch(`${API}/api${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!res.ok) throw new Error('No se pudo cargar el archivo');
+  return URL.createObjectURL(await res.blob());
+}

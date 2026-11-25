@@ -23,14 +23,15 @@ const clean = (s) => {
   try {
     s = decodeURIComponent(s);
   } catch {}
-  return s.replace(/^[#/]+/, '').replace(/\/+$/, '').trim().toLowerCase();
+  return s.replace(/^[#/]+/, '').replace(/\/+$/, '').replace(/\/{2,}/g, '/').trim().toLowerCase();
 };
 
+// Ruta completa: '', 'desmont-landvik', 'evento/fiesta-x', 'pedido/<token>', 'puerta'…
 function read() {
   const fromHash = clean(location.hash);
   if (fromHash) return fromHash;
   if (!PATH_MODE) return '';
-  return clean(location.pathname.split('/').filter(Boolean).pop() || ''); // "/%23slug" → "slug"
+  return clean(location.pathname); // "/%23slug" (link roto por Instagram) → "slug"
 }
 
 export function navigate(to = '', { replace = false } = {}) {

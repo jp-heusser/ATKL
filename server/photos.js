@@ -13,12 +13,12 @@ const MAGIC = {
 const bad = (msg) => Object.assign(new Error(msg), { status: 400 });
 
 // "data:image/jpeg;base64,…" → { type, buffer }, validando formato real y tamaño.
-function parseImage(dataUrl) {
+export function parseImage(dataUrl, maxBytes = MAX_BYTES) {
   const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl || ''));
   if (!m) throw bad('La imagen debe ser JPG, PNG o WebP');
   const buffer = Buffer.from(m[2], 'base64');
   if (!MAGIC[m[1]].every((b, i) => buffer[i] === b)) throw bad('El archivo no es una imagen válida');
-  if (buffer.length > MAX_BYTES) throw bad('La imagen es demasiado grande (máximo 600 kB)');
+  if (buffer.length > maxBytes) throw bad(`La imagen es demasiado grande (máximo ${Math.round(maxBytes / 1024)} kB)`);
   return { type: m[1], buffer };
 }
 

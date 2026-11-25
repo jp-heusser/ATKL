@@ -100,3 +100,48 @@ La web y la API quedan en el mismo dominio, así que no hace falta `VITE_API_URL
 Límites a tener en cuenta: el tope de intentos de login se cuenta por instancia de la función (en serverless es aproximado), y la primera visita tras un rato sin uso tarda un poco más (arranque en frío).
 
 El workflow de GitHub Pages sigue funcionando, pero publica una versión solo estática (sin API ni panel). Si se usa Vercel, conviene desactivar Pages para no tener dos webs.
+
+## Venta de entradas (transferencia + validación manual)
+
+**Flujo**
+
+1. El admin crea el evento (pestaña **Eventos**), le agrega tipos de entrada (precio, capacidad, máximo por compra), completa los **datos de transferencia** y lo pasa a **Publicado**.
+2. El evento aparece en el inicio. El comprador, sin crear cuenta, elige entrada y cantidad, deja nombre, correo y RUT/pasaporte, transfiere y sube la captura del comprobante.
+3. Las entradas quedan **reservadas** y el comprador recibe un link privado `/pedido/<token>`, que se actualiza solo.
+4. El admin revisa el comprobante en **Ventas** y **aprueba** (se generan las entradas con QR en el link del comprador) o **rechaza** con un motivo (las entradas vuelven a la venta). Un pedido aprobado se puede **anular** (devolución): sus QR dejan de servir.
+5. En la puerta, el personal entra a `/puerta`, elige el evento y escanea los QR con la cámara del celular. Si un QR no se lee, puede buscar por código de pedido (ATK-…) o RUT.
+
+**Colecciones**
+
+| Modelo | Colección | Contenido |
+|---|---|---|
+| `Event` | `events` | `slug`, `title`, `description`, `venue`, `address`, `city`, `startsAt`, `status` (`draft` / `published` / `closed`) |
+| `TicketType` | `tickettypes` | `event`, `name`, `price` (CLP), `capacity`, `remaining`, `sold`, `maxPerOrder`, `active` |
+| `Order` | `orders` | `code` (ATK-XXXXXX), `tokenHash`, `event`, `ticketType`, copia de nombre y precio, `quantity`, `total`, `buyer` (nombre, correo, RUT/pasaporte, teléfono), `status` (`pending` / `approved` / `rejected` / `cancelled`), `reviewedBy`, `note` |
+| `Proof` | `proofs` | Imagen del comprobante de cada pedido (solo admin) |
+| `Ticket` | `tickets` | Una por persona: `code` (va en el QR), `order`, `seq`, `event`, `holder`, `status` (`valid` / `used` / `void`), `usedAt`, `usedBy` |
+| `Label.payment` | `labels` | Datos de la cuenta para transferir |
+| `User` (rol `door`) | `users` | Personal de puerta: solo puede escanear |
+
+**Garantías**
+
+- No se vende más que la capacidad: la reserva descuenta con una operación atómica condicionada (`remaining >= cantidad`).
+- Un pedido no se aprueba dos veces (cambio de estado condicionado + índice único `order+seq` en las entradas).
+- Un QR entra una sola vez, aunque dos lectores lo escaneen a la vez.
+- El link del comprador es un token aleatorio de 64 caracteres; en la base solo se guarda su hash.
+- Los comprobantes solo los ve un admin y nunca se guardan en caché.
+- Límite: 10 pedidos cada 15 min por IP.
+
+**Rutas**
+
+- Públicas: `GET /api/events`, `GET /api/events/:slug`, `POST /api/orders`, `GET /api/orders/:token`.
+- Admin: `GET/POST /api/admin/events`, `PUT /api/admin/events/:id`, `POST /api/admin/events/:id/types`, `PUT /api/admin/types/:id`, `GET/PUT /api/admin/payment`, `GET /api/admin/orders`, `GET /api/admin/orders/:id/proof`, `POST /api/admin/orders/:id/approve|reject|void`, `GET/POST /api/admin/staff`, `PUT /api/admin/staff/:id`.
+- Puerta (roles `door` o `admin`): `GET /api/door/events`, `POST /api/door/checkin`, `GET /api/door/lookup?q=`.
+
+Cuenta de puerta por terminal: `npm run create-user -- door correo@dominio.cl` (o desde el panel: Eventos → Personal de puerta).
+
+**Pendiente / ideas**
+
+- Enviar las entradas también por correo (requiere un servicio de envío).
+- Pedidos pendientes que nadie revisa mantienen sus entradas reservadas hasta que el admin los rechace.
+- Exportar a planilla las ventas de un evento.

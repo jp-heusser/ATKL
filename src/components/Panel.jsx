@@ -1,33 +1,13 @@
-/* Panel: el artista edita su perfil; el admin edita el sello, los artistas y crea cuentas. */
+/* Panel: el artista edita su perfil; el admin edita el sello, los artistas, los eventos y valida pagos. */
 import { link } from '../router.js';
 import { useEffect, useState } from 'react';
 import { api, setToken } from '../api.js';
 import LinksEditor from './LinksEditor.jsx';
 import PhotoField from './PhotoField.jsx';
+import { useSaver, Status } from './ui.jsx';
+import { AdminEvents, AdminOrders } from './AdminTickets.jsx';
 
 const blank = { name: '', role: '', city: '', photo: '', socials: [], links: [] };
-
-function useSaver() {
-  const [state, setState] = useState({ busy: false, ok: '', error: '' });
-  const run = async (fn, okMsg = 'Guardado ✓') => {
-    setState({ busy: true, ok: '', error: '' });
-    try {
-      const r = await fn();
-      setState({ busy: false, ok: okMsg, error: '' });
-      return r;
-    } catch (e) {
-      setState({ busy: false, ok: '', error: e.message });
-    }
-  };
-  return [state, run];
-}
-
-const Status = ({ s }) => (
-  <>
-    {s.error && <p className="msg msg-error" role="alert">{s.error}</p>}
-    {s.ok && <p className="msg msg-ok" role="status">{s.ok}</p>}
-  </>
-);
 
 /* ---------- Perfil de artista (propio, o el elegido por el admin) ---------- */
 function ArtistForm({ initial, onSave, admin, onSaved, photoPath }) {
@@ -229,8 +209,16 @@ function AdminArtists({ onSaved }) {
 export default function Panel({ user, onLogout, onChanged }) {
   const [mine, setMine] = useState(null);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState('artistas');
+  const [tab, setTab] = useState('ventas');
+  const [pending, setPending] = useState(0);
   const admin = user.role === 'admin';
+
+  // Pedidos por revisar (se muestra en la pestaña Ventas).
+  const refreshPending = () =>
+    api('/admin/orders?status=pending').then((l) => setPending(l.length)).catch(() => {});
+  useEffect(() => {
+    if (admin) refreshPending();
+  }, [admin]);
 
   useEffect(() => {
     if (admin) return;
@@ -254,10 +242,17 @@ export default function Panel({ user, onLogout, onChanged }) {
       {admin ? (
         <>
           <div className="tabs" role="tablist">
+            <button role="tab" aria-selected={tab === 'ventas'} onClick={() => setTab('ventas')}>
+              Ventas{pending > 0 && <span className="tab-badge">{pending}</span>}
+            </button>
+            <button role="tab" aria-selected={tab === 'eventos'} onClick={() => setTab('eventos')}>Eventos</button>
             <button role="tab" aria-selected={tab === 'artistas'} onClick={() => setTab('artistas')}>Artistas</button>
             <button role="tab" aria-selected={tab === 'sello'} onClick={() => setTab('sello')}>Sello</button>
           </div>
-          {tab === 'artistas' ? <AdminArtists onSaved={onChanged} /> : <LabelForm onSaved={onChanged} />}
+          {tab === 'ventas' && <AdminOrders onChanged={refreshPending} />}
+          {tab === 'eventos' && <AdminEvents onChanged={onChanged} />}
+          {tab === 'artistas' && <AdminArtists onSaved={onChanged} />}
+          {tab === 'sello' && <LabelForm onSaved={onChanged} />}
         </>
       ) : (
         <>

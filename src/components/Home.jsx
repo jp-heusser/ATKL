@@ -3,10 +3,11 @@ import { isValidLink } from '../platforms.js';
 import { LinkItem } from './LinkButton.jsx';
 import SocialIcons from './SocialIcons.jsx';
 import Avatar from './Avatar.jsx';
+import { dayMonth } from '../format.js';
 
 const LOGO = `${import.meta.env.BASE_URL}logo-atkl.webp`;
 
-export default function Home({ label, artists }) {
+export default function Home({ label, artists, events = [] }) {
   const links = label.links.filter(isValidLink);
 
   return (
@@ -20,6 +21,25 @@ export default function Home({ label, artists }) {
         <p className="label-bio">{label.bio}</p>
         <SocialIcons links={label.socials} label="Redes de ATKL Records" />
       </header>
+
+      {events.length > 0 && (
+        <section className="events" aria-labelledby="events-title">
+          <h2 id="events-title" className="ig-title">Próximos eventos</h2>
+          {events.map((e) => {
+            const d = dayMonth(e.startsAt);
+            return (
+              <a key={e.slug} className="event-card rise" href={link(`evento/${e.slug}`)}>
+                <span className="ev-date"><strong>{d.day}</strong><small>{d.month}</small></span>
+                <span className="ev-text">
+                  <strong>{e.title}</strong>
+                  <small>{[e.venue, e.city].filter(Boolean).join(' · ')}</small>
+                </span>
+                <span className="ev-cta">{e.onSale ? 'Entradas' : 'Venta cerrada'}</span>
+              </a>
+            );
+          })}
+        </section>
+      )}
 
       <div className="link-stack">
         {links.map((entry, i) => (

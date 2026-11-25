@@ -7,6 +7,9 @@ import Home from './components/Home.jsx';
 import ArtistPage from './components/ArtistPage.jsx';
 import Login from './components/Login.jsx';
 import Panel from './components/Panel.jsx';
+import EventPage from './components/EventPage.jsx';
+import OrderPage from './components/OrderPage.jsx';
+import DoorPage from './components/DoorPage.jsx';
 
 // Tema: siempre abre en oscuro; el claro se elige con el botón y se recuerda en este navegador.
 const savedTheme = () => {
@@ -18,8 +21,9 @@ const savedTheme = () => {
 };
 
 export default function App() {
-  const { label, artists, reload } = useHub();
-  const slug = useRoute(); // 'desmont-landvik', 'acceso', 'panel' o '' (inicio)
+  const { label, artists, events, reload } = useHub();
+  const route = useRoute(); // '', 'desmont-landvik', 'acceso', 'panel', 'puerta', 'evento/x', 'pedido/<token>'
+  const [section, param] = route.split('/');
   const [theme, setTheme] = useState(savedTheme);
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(() => USE_API && !!getToken());
@@ -41,16 +45,29 @@ export default function App() {
       .finally(() => setChecking(false));
   }, [checking]);
 
-  const isPanel = USE_API && (slug === 'acceso' || slug === 'panel');
-  const artist = artists.find((a) => a.slug === slug);
+  const isPanel = USE_API && ['acceso', 'panel', 'puerta'].includes(route);
+  const artist = artists.find((a) => a.slug === route);
+  const canDoor = user && (user.role === 'door' || user.role === 'admin');
+  const logout = () => {
+    setUser(null);
+    navigate('');
+  };
+  // Tras iniciar sesión: el personal de puerta va directo al escáner.
+  const afterLogin = (u) => {
+    setUser(u);
+    navigate(u.role === 'door' || route === 'puerta' ? 'puerta' : 'panel');
+  };
 
   let view;
-  if (isPanel) {
+  if (USE_API && section === 'evento' && param) view = <EventPage slug={param} />;
+  else if (USE_API && section === 'pedido' && param) view = <OrderPage token={param} />;
+  else if (isPanel) {
     if (checking) view = <main className="page" />;
-    else if (user) view = <Panel user={user} onLogout={() => { setUser(null); navigate(''); }} onChanged={reload} />;
-    else view = <Login onLogin={(u) => { setUser(u); navigate('panel'); }} />;
+    else if (!user) view = <Login onLogin={afterLogin} />;
+    else if (route === 'puerta' || user.role === 'door') view = canDoor ? <DoorPage user={user} onLogout={logout} /> : <Panel user={user} onLogout={logout} onChanged={reload} />;
+    else view = <Panel user={user} onLogout={logout} onChanged={reload} />;
   } else {
-    view = artist ? <ArtistPage artist={artist} /> : <Home label={label} artists={artists} />;
+    view = artist ? <ArtistPage artist={artist} /> : <Home label={label} artists={artists} events={events} />;
   }
 
   return (
