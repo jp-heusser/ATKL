@@ -101,12 +101,12 @@ export default function EventPage({ slug }) {
     <main className="page">
       <nav className="back"><a href={link('')}>← ATKL Records</a></nav>
 
-      {event.image && <img className="ev-hero" src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} width="1600" height="900" />}
       <header className="event-head">
         <span className="event-kicker">Entradas</span>
         <h1 className="artist-title">{event.title}</h1>
         <p className="event-when">{fullDate(event.startsAt)}</p>
         <p className="artist-meta">{[event.venue, event.address, event.city].filter(Boolean).join(' · ')}</p>
+        {event.image && <img className="ev-hero ev-hero-in" src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} width="1600" height="900" />}
         {event.description && <p className="event-desc">{event.description}</p>}
       </header>
 

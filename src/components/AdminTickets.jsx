@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, apiBlobUrl } from '../api.js';
 import { link } from '../router.js';
-import { clp, shortDateTime, toLocalInput, STATUS, cropImage } from '../format.js';
+import { clp, shortDateTime, toLocalInput, STATUS, eventImage16x9 } from '../format.js';
 import { photoUrl } from './Avatar.jsx';
 import { useSaver, Status } from './ui.jsx';
 
@@ -152,7 +152,9 @@ export function AdminOrders({ onChanged }) {
    ========================================================= */
 const blankEvent = { title: '', slug: '', startsAt: '', venue: '', address: '', city: '', description: '', status: 'draft', ticketUrl: '' };
 
-// Imagen 16:9 del evento: se recorta al centro en el navegador (1600×900) y se guarda al instante.
+const IMAGE_HINT = 'Se guarda en 16:9. Un flyer vertical (reel 9:16) se muestra entero, con los costados rellenos por una versión borrosa.';
+
+// Imagen 16:9 del evento (evento ya creado): se procesa en el navegador y se guarda al instante.
 function EventImageField({ ev, onChanged }) {
   const [img, setImg] = useState(ev.image);
   const [s, run] = useSaver();
@@ -162,7 +164,7 @@ function EventImageField({ ev, onChanged }) {
     e.target.value = '';
     if (!file) return;
     run(async () => {
-      const r = await api(`/admin/events/${ev.id}/image`, { method: 'PUT', body: { image: await cropImage(file) } });
+      const r = await api(`/admin/events/${ev.id}/image`, { method: 'PUT', body: { image: await eventImage16x9(file) } });
       setImg(r.image);
       onChanged();
     }, 'Imagen guardada ✓');
@@ -180,7 +182,7 @@ function EventImageField({ ev, onChanged }) {
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} disabled={s.busy} />
         {img ? <img src={photoUrl(img)} alt="Imagen del evento" /> : <span>{s.busy ? 'Subiendo…' : 'Elegir imagen'}</span>}
       </label>
-      <p className="form-hint">Se recorta al centro en formato 16:9 (ideal 1600×900). {img && <button type="button" className="btn-link" onClick={remove}>Quitar imagen</button>}</p>
+      <p className="form-hint">{IMAGE_HINT} {img && <button type="button" className="btn-link" onClick={remove}>Quitar imagen</button>}</p>
       <Status s={s} />
     </div>
   );
@@ -188,8 +190,24 @@ function EventImageField({ ev, onChanged }) {
 
 function EventForm({ ev, onSaved }) {
   const [e, setE] = useState(ev ? { ...ev, startsAt: toLocalInput(ev.startsAt) } : blankEvent);
+  const [image, setImage] = useState(''); // solo al crear: se sube justo después de crear el evento
+  const [imgErr, setImgErr] = useState('');
   const [s, run] = useSaver();
-  useEffect(() => setE(ev ? { ...ev, startsAt: toLocalInput(ev.startsAt) } : blankEvent), [ev?.id]);
+  const pickImage = async (x) => {
+    const file = x.target.files?.[0];
+    x.target.value = '';
+    setImgErr('');
+    if (!file) return;
+    try {
+      setImage(await eventImage16x9(file));
+    } catch (err) {
+      setImgErr(err.message);
+    }
+  };
+  useEffect(() => {
+    setE(ev ? { ...ev, startsAt: toLocalInput(ev.startsAt) } : blankEvent);
+    setImage('');
+  }, [ev?.id]);
   const f = (k) => ({ value: e[k] ?? '', onChange: (x) => setE({ ...e, [k]: x.target.value }) });
 
   const submit = (x) => {
@@ -200,6 +218,8 @@ function EventForm({ ev, onSaved }) {
       else {
         const r = await api('/admin/events', { method: 'POST', body });
         body.id = r.id;
+        if (image) await api(`/admin/events/${r.id}/image`, { method: 'PUT', body: { image } });
+        setImage('');
       }
       onSaved(ev?.id || body.id);
     });
@@ -208,6 +228,17 @@ function EventForm({ ev, onSaved }) {
   return (
     <form className="card form" onSubmit={submit}>
       <span className="form-label">{ev ? 'Datos del evento' : 'Nuevo evento'}</span>
+      {!ev && (
+        <>
+          <span className="form-label">Imagen (16:9)</span>
+          <label className="file-drop ev-img-drop">
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pickImage} />
+            {image ? <img src={image} alt="Imagen del evento" /> : <span>Elegir imagen (opcional)</span>}
+          </label>
+          <p className="form-hint">{IMAGE_HINT} {image && <button type="button" className="btn-link" onClick={() => setImage('')}>Quitar</button>}</p>
+          {imgErr && <p className="msg msg-error">{imgErr}</p>}
+        </>
+      )}
       <label>Nombre<input required maxLength={120} {...f('title')} /></label>
       {!ev && (
         <label>Slug (su link: /evento/…)<input required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="dkstle-rancagua-dic" {...f('slug')} onChange={(x) => setE({ ...e, slug: x.target.value.toLowerCase() })} /></label>
