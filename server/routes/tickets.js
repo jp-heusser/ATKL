@@ -29,6 +29,7 @@ export const publicEvent = (e) => ({
   city: e.city,
   startsAt: e.startsAt,
   image: e.image || '',
+  imageFull: e.imageFull || '',
   ticketUrl: e.ticketUrl || '',
   onSale: salesOpen(e),
 });
@@ -50,12 +51,24 @@ router.get('/events', async (_req, res) => {
 });
 
 // Imagen del evento (pública; la dirección cambia con cada subida, así que se guarda en caché).
+const sendBin = (res, type, data) => {
+  res.set({ 'Content-Type': type, 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' });
+  res.send(Buffer.isBuffer(data) ? data : Buffer.from(data.buffer));
+};
+
 router.get('/events/:id/image', async (req, res) => {
   if (!/^[a-f0-9]{24}$/i.test(req.params.id)) return res.status(404).end();
-  const img = await EventImage.findOne({ event: req.params.id }).lean();
+  const img = await EventImage.findOne({ event: req.params.id }).select('type data').lean();
   if (!img) return res.status(404).end();
-  res.set({ 'Content-Type': img.type, 'Cache-Control': 'public, max-age=31536000, immutable', 'X-Content-Type-Options': 'nosniff' });
-  res.send(Buffer.isBuffer(img.data) ? img.data : Buffer.from(img.data.buffer));
+  sendBin(res, img.type, img.data);
+});
+
+// Original sin recortar (vista ampliada).
+router.get('/events/:id/image/full', async (req, res) => {
+  if (!/^[a-f0-9]{24}$/i.test(req.params.id)) return res.status(404).end();
+  const img = await EventImage.findOne({ event: req.params.id }).select('fullType fullData').lean();
+  if (!img?.fullData) return res.status(404).end();
+  sendBin(res, img.fullType, img.fullData);
 });
 
 // Un evento con sus tipos de entrada y los datos para transferir.

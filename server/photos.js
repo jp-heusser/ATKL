@@ -38,16 +38,25 @@ export async function removePhoto(artist) {
 /* ---------- Imagen de evento (16:9) ---------- */
 const EVENT_MAX = 1.5 * 1024 * 1024;
 
-// Guarda la imagen del evento (dataURL o Buffer ya validado) y deja su dirección en ev.image.
-export async function saveEventImage(ev, input) {
+// Guarda la imagen del evento (dataURL o Buffer ya validado) y deja sus direcciones en el evento.
+// full (opcional): la original sin recortar, para la vista ampliada.
+export async function saveEventImage(ev, input, full) {
   const { type, buffer } = typeof input === 'string' ? parseImage(input, EVENT_MAX) : input;
-  await EventImage.findOneAndUpdate({ event: ev._id }, { type, data: buffer }, { upsert: true });
-  ev.image = `/api/events/${ev._id}/image?v=${Date.now()}`;
+  const f = full ? parseImage(full, EVENT_MAX) : null;
+  await EventImage.findOneAndUpdate(
+    { event: ev._id },
+    { type, data: buffer, fullType: f?.type || '', fullData: f?.buffer || null },
+    { upsert: true },
+  );
+  const v = Date.now();
+  ev.image = `/api/events/${ev._id}/image?v=${v}`;
+  ev.imageFull = f ? `/api/events/${ev._id}/image/full?v=${v}` : '';
 }
 
 export async function removeEventImage(ev) {
   await EventImage.deleteOne({ event: ev._id });
   ev.image = '';
+  ev.imageFull = '';
 }
 
 // Para el script de carga: valida bytes descargados (formato real y tamaño).

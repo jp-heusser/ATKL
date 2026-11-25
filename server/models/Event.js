@@ -22,6 +22,7 @@ const eventSchema = new mongoose.Schema(
     status: { type: String, enum: ['draft', 'published', 'closed'], default: 'draft' },
     // Imagen 16:9: dirección donde se sirve (/api/events/<id>/image?v=…). Vacío = sin imagen.
     image: { type: String, default: '' },
+    imageFull: { type: String, default: '' }, // original sin recortar (vista ampliada)
     // Opcional: venta en otra plataforma (Toliv, Passline…). Se muestra como botón.
     ticketUrl: {
       type: String,

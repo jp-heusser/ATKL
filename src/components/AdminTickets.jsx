@@ -2,7 +2,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, apiBlobUrl } from '../api.js';
 import { link } from '../router.js';
-import { clp, shortDateTime, toLocalInput, STATUS, eventImage16x9 } from '../format.js';
+import { clp, shortDateTime, toLocalInput, STATUS, eventImage16x9, compressImage } from '../format.js';
+
+// Versión 16:9 para mostrar + original sin recortar (máx. 1600 px) para la vista ampliada.
+const prepareEventImage = async (file) => ({ image: await eventImage16x9(file), full: await compressImage(file, 1600, 0.85) });
 import { photoUrl } from './Avatar.jsx';
 import { useSaver, Status } from './ui.jsx';
 
@@ -164,7 +167,7 @@ function EventImageField({ ev, onChanged }) {
     e.target.value = '';
     if (!file) return;
     run(async () => {
-      const r = await api(`/admin/events/${ev.id}/image`, { method: 'PUT', body: { image: await eventImage16x9(file) } });
+      const r = await api(`/admin/events/${ev.id}/image`, { method: 'PUT', body: await prepareEventImage(file) });
       setImg(r.image);
       onChanged();
     }, 'Imagen guardada ✓');
@@ -190,7 +193,7 @@ function EventImageField({ ev, onChanged }) {
 
 function EventForm({ ev, onSaved }) {
   const [e, setE] = useState(ev ? { ...ev, startsAt: toLocalInput(ev.startsAt) } : blankEvent);
-  const [image, setImage] = useState(''); // solo al crear: se sube justo después de crear el evento
+  const [image, setImage] = useState(null); // solo al crear: { image, full }; se sube justo después de crear el evento
   const [imgErr, setImgErr] = useState('');
   const [s, run] = useSaver();
   const pickImage = async (x) => {
@@ -199,14 +202,14 @@ function EventForm({ ev, onSaved }) {
     setImgErr('');
     if (!file) return;
     try {
-      setImage(await eventImage16x9(file));
+      setImage(await prepareEventImage(file));
     } catch (err) {
       setImgErr(err.message);
     }
   };
   useEffect(() => {
     setE(ev ? { ...ev, startsAt: toLocalInput(ev.startsAt) } : blankEvent);
-    setImage('');
+    setImage(null);
   }, [ev?.id]);
   const f = (k) => ({ value: e[k] ?? '', onChange: (x) => setE({ ...e, [k]: x.target.value }) });
 
@@ -218,8 +221,8 @@ function EventForm({ ev, onSaved }) {
       else {
         const r = await api('/admin/events', { method: 'POST', body });
         body.id = r.id;
-        if (image) await api(`/admin/events/${r.id}/image`, { method: 'PUT', body: { image } });
-        setImage('');
+        if (image) await api(`/admin/events/${r.id}/image`, { method: 'PUT', body: image });
+        setImage(null);
       }
       onSaved(ev?.id || body.id);
     });
@@ -233,9 +236,9 @@ function EventForm({ ev, onSaved }) {
           <span className="form-label">Imagen (16:9)</span>
           <label className="file-drop ev-img-drop">
             <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pickImage} />
-            {image ? <img src={image} alt="Imagen del evento" /> : <span>Elegir imagen (opcional)</span>}
+            {image ? <img src={image.image} alt="Imagen del evento" /> : <span>Elegir imagen (opcional)</span>}
           </label>
-          <p className="form-hint">{IMAGE_HINT} {image && <button type="button" className="btn-link" onClick={() => setImage('')}>Quitar</button>}</p>
+          <p className="form-hint">{IMAGE_HINT} {image && <button type="button" className="btn-link" onClick={() => setImage(null)}>Quitar</button>}</p>
           {imgErr && <p className="msg msg-error">{imgErr}</p>}
         </>
       )}

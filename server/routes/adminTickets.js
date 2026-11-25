@@ -50,6 +50,7 @@ router.get('/events', async (_req, res) => {
       startsAt: e.startsAt,
       status: e.status,
       image: e.image || '',
+      imageFull: e.imageFull || '',
       ticketUrl: e.ticketUrl || '',
       pendingOrders: pend.get(String(e._id)) || 0,
       types: types.filter((t) => String(t.event) === String(e._id)).map(adminType),
@@ -89,9 +90,9 @@ router.put('/events/:id', async (req, res) => {
 router.put('/events/:id/image', async (req, res) => {
   const ev = await Event.findById(req.params.id);
   if (!ev) return res.status(404).json({ error: 'Evento no encontrado' });
-  await saveEventImage(ev, req.body?.image);
+  await saveEventImage(ev, req.body?.image, req.body?.full);
   await ev.save();
-  res.json({ image: ev.image });
+  res.json({ image: ev.image, imageFull: ev.imageFull });
 });
 
 router.delete('/events/:id/image', async (req, res) => {

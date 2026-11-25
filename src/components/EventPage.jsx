@@ -5,6 +5,7 @@ import { link, navigate } from '../router.js';
 import { clp, fullDate, compressImage } from '../format.js';
 import { rememberOrder } from './OrderPage.jsx';
 import { photoUrl } from './Avatar.jsx';
+import Lightbox from './Lightbox.jsx';
 
 function CopyValue({ label, value }) {
   const [done, setDone] = useState(false);
@@ -36,6 +37,7 @@ export default function EventPage({ slug }) {
   const [accept, setAccept] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendErr, setSendErr] = useState('');
+  const [zoom, setZoom] = useState(false);
 
   useEffect(() => {
     api(`/events/${slug}`)
@@ -100,13 +102,19 @@ export default function EventPage({ slug }) {
   return (
     <main className="page">
       <nav className="back"><a href={link('')}>← ATKL Records</a></nav>
+      {zoom && event.image && <Lightbox src={photoUrl(event.imageFull || event.image)} alt={`Imagen de ${event.title}`} onClose={() => setZoom(false)} />}
 
       <header className="event-head">
         <span className="event-kicker">Entradas</span>
         <h1 className="artist-title">{event.title}</h1>
         <p className="event-when">{fullDate(event.startsAt)}</p>
         <p className="artist-meta">{[event.venue, event.address, event.city].filter(Boolean).join(' · ')}</p>
-        {event.image && <img className="ev-hero ev-hero-in" src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} width="1600" height="900" />}
+        {event.image && (
+          <button type="button" className="ev-hero-btn" onClick={() => setZoom(true)} aria-label="Ver imagen en grande">
+            <img className="ev-hero ev-hero-in" src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} width="1600" height="900" />
+            <span className="ev-zoom-hint" aria-hidden="true">⤢</span>
+          </button>
+        )}
         {event.description && <p className="event-desc">{event.description}</p>}
       </header>
 
