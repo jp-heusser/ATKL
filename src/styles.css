@@ -1279,6 +1279,19 @@ a.btn-ghost { text-align: center; }
   .ev-media-hero.is-portrait { aspect-ratio: 4 / 5; }
 }
 /* Escritorio: portada grande; si es vertical, marco 4:3 sin pasar del 78 % de la pantalla */
+/* Escritorio: la portada es la imagen misma, centrada y de su propio tamaño (sin fondo difuminado) */
 @media (min-width: 700px) {
-  .ev-media-hero.is-portrait { aspect-ratio: 4 / 3; max-height: 78vh; }
+  .ev-hero-btn { width: auto; max-width: none; }
+  .ev-media-hero,
+  .ev-media-hero.is-portrait { width: auto; aspect-ratio: auto; background: none; }
+  .ev-media-hero .ev-media-bg { display: none; }
+  .ev-media-hero .ev-media-fg {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(calc(100vw - 48px), 820px);
+    max-height: 70vh;
+    filter: none;
+  }
 }
