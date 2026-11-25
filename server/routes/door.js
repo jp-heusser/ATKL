@@ -1,6 +1,6 @@
 /* Puerta: escanear y validar entradas. Roles: door o admin. */
-import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import { Router } from '../router.js';
+import rateLimit from '../router.js';
 import Event from '../models/Event.js';
 import Ticket from '../models/Ticket.js';
 import Order from '../models/Order.js';

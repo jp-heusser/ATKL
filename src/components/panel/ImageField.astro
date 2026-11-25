@@ -1,0 +1,35 @@
+---
+/* Foto de artista (cuadrada) o imagen de evento (original). Se sube al elegirla.
+   - upload: endpoint PUT/DELETE (si no hay, la imagen queda guardada en el formulario para subirla después de crear).
+   - kind: 'photo' | 'event' */
+import Avatar from '../Avatar.astro';
+import EventMedia from '../EventMedia.astro';
+import { photoUrl } from '../../lib/media.js';
+const { kind = 'photo', upload, current = '', name = '', hint } = Astro.props;
+const src = current ? photoUrl(current) : '';
+---
+<div class="image-field" data-image-field data-kind={kind} data-upload={upload || ''}>
+  {kind === 'photo' ? (
+    <div class="photo-field">
+      <span data-preview><Avatar artist={{ name, photo: current }} size={72} /></span>
+      <div class="photo-actions">
+        <span class="form-label">Foto de perfil</span>
+        <div class="photo-buttons">
+          <label class="btn-ghost file-btn"><input type="file" accept="image/jpeg,image/png,image/webp" hidden /><span data-pick-text>{current ? 'Cambiar foto' : 'Subir foto'}</span></label>
+          <button type="button" class="btn-link" data-remove-image hidden={!current}>Quitar</button>
+        </div>
+        <span class="form-hint">JPG, PNG o WebP. Se recorta cuadrada.</span>
+      </div>
+    </div>
+  ) : (
+    <div class="form">
+      <span class="form-label">Imagen del evento</span>
+      <label class="file-drop ev-img-drop">
+        <input type="file" accept="image/jpeg,image/png,image/webp" />
+        <span data-preview>{src ? <EventMedia src={src} alt="Imagen del evento" /> : <span>{upload ? 'Elegir imagen' : 'Elegir imagen (opcional)'}</span>}</span>
+      </label>
+      <p class="form-hint">{hint || 'Se guarda sin recortar. Horizontal (ideal 16:9) o vertical tipo reel (9:16): siempre se muestra completa.'} <button type="button" class="btn-link" data-remove-image hidden={!current}>Quitar imagen</button></p>
+    </div>
+  )}
+  <p class="msg" data-image-status hidden></p>
+</div>

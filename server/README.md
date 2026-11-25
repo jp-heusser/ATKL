@@ -1,6 +1,6 @@
-# API de ATKL Records (Express + MongoDB)
+# API de ATKL Records (Astro + MongoDB)
 
-Backend del hub. Guarda en MongoDB los datos del sello y de los artistas, y los entrega a la web.
+Backend del hub. Guarda en MongoDB los datos del sello, artistas, eventos y entradas. Las rutas (`server/routes/`) tienen la misma forma que con Express, pero corren dentro de Astro a través de `server/router.js` y `src/pages/api/[...path].js`; las páginas leen la base directamente.
 
 ## Puesta en marcha
 
@@ -8,8 +8,7 @@ Backend del hub. Guarda en MongoDB los datos del sello y de los artistas, y los 
 2. Crear el archivo **`.env`** en la raíz del proyecto, copiando `.env.example`: poner la cadena de conexión real en `MONGODB_URI` (usuario y contraseña **sin** los `< >`) y una clave larga y aleatoria en `JWT_SECRET`.
 3. En MongoDB Atlas → **Network Access**, autorizar la IP desde donde se conecta.
 4. Cargar los datos actuales en la base: `npm run seed`
-5. Levantar la API: `npm run server` → http://localhost:3001/api/hub
-6. En otra terminal, la web: `npm run dev` → http://localhost:5173
+5. Levantar web + API: `npm run dev` → http://localhost:4321 (la API en http://localhost:4321/api/hub)
 
 El `.env` está en `.gitignore`: **nunca** se sube al repositorio.
 
@@ -31,8 +30,9 @@ Cada enlace es `{ url, label, icon, embed }`. Con `embed: true` se muestra como 
 - `GET /api/hub` — sello + artistas activos (lo que usa la web).
 - `GET /api/artists/:slug` — un artista.
 
-**Sesión** (`Authorization: Bearer <token>`, dura 7 días)
-- `POST /api/auth/login` — `{ email, password }` → `{ token, user }`. Máximo 10 intentos cada 15 min por IP.
+**Sesión** (cookie `httpOnly` `atkl_session` en la web, o `Authorization: Bearer <token>`; dura 7 días)
+- `POST /api/auth/login` — `{ email, password }` → crea la cookie y devuelve `{ token, user }`. Máximo 10 intentos cada 15 min por IP.
+- `POST /api/auth/logout` — borra la cookie.
 - `GET /api/auth/me` — usuario de la sesión.
 - `POST /api/auth/password` — `{ current, next }` (mínimo 10 caracteres).
 
@@ -67,9 +67,7 @@ El enlace "Acceso" aparece al pie de la web solo cuando hay API configurada.
 
 ## Cómo usa la web estos datos
 
-`src/useHub.js` muestra primero los datos locales (`src/data/`) y, si la API responde, los reemplaza por los de MongoDB. Si la API no está disponible, la web sigue funcionando con los datos locales (sin panel).
-
-En producción, la web necesita la variable `VITE_API_URL` con la dirección pública de la API al hacer el build, y conviene limitar `CORS_ORIGIN` al dominio de la web. GitHub Pages solo sirve archivos estáticos: la API debe alojarse aparte (Render, Railway, Fly.io, un VPS…).
+Las páginas de Astro leen MongoDB directamente al generarse (inicio, artistas, eventos, pedidos y panel). Si la base no responde, el inicio y las páginas de artistas usan los datos de respaldo de `src/data/`.
 
 ## Fotos de perfil
 
@@ -83,23 +81,9 @@ Rutas: `PUT/DELETE /api/me/photo` (artista) y `PUT/DELETE /api/admin/artists/:sl
 
 - Recuperación de contraseña por correo (hoy la reinicia un admin).
 
-## Publicar en Vercel (web + API juntas)
+## Publicar en Vercel
 
-El repo ya está preparado: `vercel.json` publica la web (Vite) y envía todo `/api/*` a `api/index.js`, que ejecuta la app Express como función serverless.
-
-1. En vercel.com → **Add New → Project** → importar el repositorio de GitHub. Vercel detecta Vite; no hay que cambiar nada.
-2. En **Settings → Environment Variables** agregar (las mismas del `.env` local):
-   - `MONGODB_URI`
-   - `MONGODB_DB` = `atkl`
-   - `JWT_SECRET` (larga y aleatoria; puede ser distinta a la local)
-3. En MongoDB Atlas → **Network Access** → permitir `0.0.0.0/0`. Vercel no tiene IP fija, así que la protección queda en el usuario y la contraseña de la base: usar una contraseña larga y generada.
-4. **Deploy**. Cada `push` a `main` vuelve a publicar.
-
-La web y la API quedan en el mismo dominio, así que no hace falta `VITE_API_URL` ni `CORS_ORIGIN`.
-
-Límites a tener en cuenta: el tope de intentos de login se cuenta por instancia de la función (en serverless es aproximado), y la primera visita tras un rato sin uso tarda un poco más (arranque en frío).
-
-El workflow de GitHub Pages sigue funcionando, pero publica una versión solo estática (sin API ni panel). Si se usa Vercel, conviene desactivar Pages para no tener dos webs.
+Ver el README principal: Vercel detecta Astro; solo hay que configurar `MONGODB_URI`, `MONGODB_DB` y `JWT_SECRET`, y permitir `0.0.0.0/0` en Atlas.
 
 ## Venta de entradas (transferencia + validación manual)
 

@@ -1,0 +1,9 @@
+---
+/* Imagen de evento: original nítida delante + la misma difuminada de fondo (CSS).
+   El marco se adapta si la imagen es vertical (clase is-portrait, la pone site.js). */
+const { src, alt = '', variant = 'card', lazy = false } = Astro.props;
+---
+<div class:list={['ev-media', `ev-media-${variant}`]}>
+  <img class="ev-media-bg" src={src} alt="" aria-hidden="true" decoding="async" loading={lazy ? 'lazy' : undefined} />
+  <img class="ev-media-fg" src={src} alt={alt} decoding="async" loading={lazy ? 'lazy' : undefined} />
+</div>

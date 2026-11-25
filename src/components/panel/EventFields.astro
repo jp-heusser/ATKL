@@ -1,0 +1,25 @@
+---
+import { toLocalInput } from '../../lib/format.js';
+const { ev = {}, isNew = false } = Astro.props;
+---
+<label>Nombre<input name="title" required maxlength="120" value={ev.title} /></label>
+{isNew && <label>Slug (su link: /evento/…)<input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="dkstle-rancagua-dic" /></label>}
+<div class="form-2">
+  <label>Fecha y hora<input type="datetime-local" name="startsAt" required value={toLocalInput(ev.startsAt)} data-local /></label>
+  <label>
+    Estado
+    <select name="status">
+      <option value="draft" selected={!ev.status || ev.status === 'draft'}>Borrador (oculto)</option>
+      <option value="published" selected={ev.status === 'published'}>Publicado (a la venta)</option>
+      <option value="closed" selected={ev.status === 'closed'}>Venta cerrada</option>
+    </select>
+  </label>
+</div>
+<div class="form-2">
+  <label>Lugar<input name="venue" maxlength="120" value={ev.venue} /></label>
+  <label>Ciudad<input name="city" maxlength="60" value={ev.city} /></label>
+</div>
+<label>Dirección<input name="address" maxlength="200" value={ev.address} /></label>
+<label>Descripción<textarea name="description" rows="4" maxlength="2000">{ev.description}</textarea></label>
+<label>Link de venta externa (opcional)<input type="url" name="ticketUrl" maxlength="500" placeholder="https://www.toliv.com/eventos/…" value={ev.ticketUrl} /></label>
+<p class="form-hint">Si las entradas se venden en otra plataforma. Se muestra como botón; si además cargas tipos de entrada, también se puede pagar por transferencia.</p>

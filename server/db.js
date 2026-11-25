@@ -1,3 +1,4 @@
+import 'dotenv/config'; // en local lee .env (en Vercel las variables ya vienen del entorno)
 import mongoose from 'mongoose';
 
 // La conexión se reutiliza entre llamadas (importante en Vercel, donde cada

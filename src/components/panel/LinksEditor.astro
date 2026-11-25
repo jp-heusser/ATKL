@@ -1,0 +1,12 @@
+---
+/* Lista editable de enlaces. Al guardar, panel.js la convierte en [{ url, label, icon, embed }]. */
+import LinkRow from './LinkRow.astro';
+const { name, links = [], allowEmbed = true, labelPlaceholder } = Astro.props;
+---
+<div class="links-editor" data-links={name} data-allow-embed={allowEmbed ? '1' : ''}>
+  <div data-rows>
+    {links.map((l) => <LinkRow l={l} allowEmbed={allowEmbed} labelPlaceholder={labelPlaceholder} />)}
+  </div>
+  <template><LinkRow allowEmbed={allowEmbed} labelPlaceholder={labelPlaceholder} /></template>
+  <button type="button" class="btn-ghost" data-add-link>+ Agregar enlace</button>
+</div>

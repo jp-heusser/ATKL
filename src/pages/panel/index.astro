@@ -1,0 +1,24 @@
+---
+/* /panel: el artista edita su perfil. El admin va a Ventas y el personal de puerta al escáner. */
+import Panel from '../../layouts/Panel.astro';
+import ArtistForm from '../../components/panel/ArtistForm.astro';
+import { guard } from '../../../server/panel.js';
+import Artist from '../../../server/models/Artist.js';
+import { linksWithLegacy, plainLinks } from '../../../server/util.js';
+
+const deny = guard(Astro);
+if (deny) return deny;
+const user = Astro.locals.user;
+if (user.role === 'admin') return Astro.redirect('/panel/ventas');
+if (user.role === 'door') return Astro.redirect('/puerta');
+
+const a = user.artist ? await Artist.findById(user.artist).lean() : null;
+const artist = a && { ...a, socials: plainLinks(a.socials), links: linksWithLegacy(a) };
+---
+<Panel title="Mi perfil" heading="Mi perfil">
+  {artist ? (
+    <ArtistForm artist={artist} apiUrl="/api/me/artist" photoUrl="/api/me/photo" />
+  ) : (
+    <p class="msg msg-error">Tu cuenta no tiene un perfil de artista asociado. Escríbele al equipo de ATKL.</p>
+  )}
+</Panel>

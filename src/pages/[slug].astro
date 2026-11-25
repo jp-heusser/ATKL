@@ -1,0 +1,47 @@
+---
+/* Página de un artista: /desmont-landvik */
+import Base from '../layouts/Base.astro';
+import LinkItem from '../components/LinkItem.astro';
+import SocialIcons from '../components/SocialIcons.astro';
+import Avatar from '../components/Avatar.astro';
+import { safe } from '../../server/pages.js';
+import { getArtist } from '../../server/routes/public.js';
+import { isValidLink } from '../lib/platforms.js';
+import { photoUrl } from '../lib/media.js';
+import { artists as localArtists } from '../data/artists.js';
+
+const raw = decodeURIComponent(Astro.params.slug || '');
+// Instagram convierte "#" en "%23": /%23slug → /slug
+const slug = raw.replace(/^#+/, '').toLowerCase();
+if (slug !== raw) return Astro.redirect(`/${slug}`, 301);
+
+const artist = (await safe(() => getArtist(slug), undefined)) ?? localArtists.find((a) => a.slug === slug) ?? null;
+if (!artist) return Astro.rewrite('/404');
+
+const links = (artist.links || []).filter(isValidLink);
+const empty = !links.length && !(artist.socials || []).filter(isValidLink).length;
+const description = [artist.role, artist.city].filter(Boolean).join(' · ') || `${artist.name} en ATKL Records`;
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+---
+<Base title={`${artist.name} — ATKL Records`} description={description} image={artist.photo ? photoUrl(artist.photo) : undefined}>
+  <main class="page">
+    <nav class="back"><a href="/">← ATKL Records</a></nav>
+    <header class="artist-head">
+      <Avatar artist={artist} size={96} />
+      <h1 class="artist-title">{artist.name}</h1>
+      {(artist.role || artist.city) && <p class="artist-meta">{[artist.role, artist.city].filter(Boolean).join(' · ')}</p>}
+      <SocialIcons links={artist.socials} label={`Redes de ${artist.name}`} />
+    </header>
+
+    {empty ? (
+      <div class="maintenance" role="status">
+        <span class="maintenance-tag">En mantención</span>
+        <p>Estamos preparando el perfil de {artist.name}. Vuelve pronto para ver sus enlaces.</p>
+      </div>
+    ) : (
+      <div class="link-stack">{links.map((entry) => <LinkItem entry={entry} />)}</div>
+    )}
+
+    <button type="button" class="copy-btn" data-copy="url" data-done="Link copiado ✓">Copiar link de este perfil</button>
+  </main>
+</Base>

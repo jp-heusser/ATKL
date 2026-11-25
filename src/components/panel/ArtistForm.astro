@@ -1,0 +1,26 @@
+---
+/* Perfil de artista: lo usa el propio artista (/panel) y el admin (/panel/artistas/slug). */
+import ImageField from './ImageField.astro';
+import LinksEditor from './LinksEditor.astro';
+const { artist, apiUrl, photoUrl, admin = false } = Astro.props;
+---
+<form class="card form" data-api={apiUrl} data-method="PUT" data-ok="Guardado ✓">
+  <ImageField kind="photo" upload={photoUrl} current={artist.photo} name={artist.name} />
+  <label>Nombre artístico<input name="name" required maxlength="80" value={artist.name} /></label>
+  <div class="form-2">
+    <label>Rol<input name="role" maxlength="80" placeholder="DJ / Productor" value={artist.role} /></label>
+    <label>Ciudad<input name="city" maxlength="60" value={artist.city} /></label>
+  </div>
+  <span class="form-label">Íconos de redes</span>
+  <p class="form-hint">Aparecen como íconos pequeños bajo el nombre.</p>
+  <LinksEditor name="socials" links={artist.socials || []} allowEmbed={false} labelPlaceholder="Nombre (opcional, para accesibilidad)" />
+  <span class="form-label">Enlaces y reproductores</span>
+  <p class="form-hint">El orden de esta lista es el orden en la página: usa ↑ ↓. Los enlaces de YouTube, SoundCloud o un post de Instagram pueden mostrarse incrustados.</p>
+  <LinksEditor name="links" links={artist.links || []} />
+  {admin && (
+    <label class="check"><input type="checkbox" name="active" checked={artist.active !== false} /> Visible en la web</label>
+  )}
+  <p class="msg" data-status hidden></p>
+  <button type="submit" class="btn-primary">Guardar cambios</button>
+  <a class="form-hint" href={`/${artist.slug}`}>Ver página →</a>
+</form>

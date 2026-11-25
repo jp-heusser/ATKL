@@ -1,0 +1,92 @@
+---
+/* Eventos: lista, nuevo evento, datos de transferencia y personal de puerta. */
+import Panel from '../../../layouts/Panel.astro';
+import EventFields from '../../../components/panel/EventFields.astro';
+import ImageField from '../../../components/panel/ImageField.astro';
+import { guard, pendingCount } from '../../../../server/panel.js';
+import Event from '../../../../server/models/Event.js';
+import Order from '../../../../server/models/Order.js';
+import Label from '../../../../server/models/Label.js';
+import User from '../../../../server/models/User.js';
+import { shortDateTime } from '../../../lib/format.js';
+
+const deny = guard(Astro, ['admin']);
+if (deny) return deny;
+const [events, pend, label, staff, pending] = await Promise.all([
+  Event.find().sort({ startsAt: -1 }).lean(),
+  Order.aggregate([{ $match: { status: 'pending' } }, { $group: { _id: '$event', n: { $sum: 1 } } }]),
+  Label.findOne({ key: 'main' }).select('payment').lean(),
+  User.find({ role: 'door' }).select('email active lastLoginAt').sort({ email: 1 }).lean(),
+  pendingCount(),
+]);
+const pendBy = new Map(pend.map((p) => [String(p._id), p.n]));
+const p = label?.payment || {};
+const STATE = { draft: 'borrador', published: 'publicado', closed: 'cerrado' };
+---
+<Panel title="Eventos" heading="Administración" active="eventos" pending={pending}>
+  <section class="card">
+    {events.length === 0 && <p class="form-hint">Aún no hay eventos.</p>}
+    <ul class="artist-list">
+      {events.map((e) => (
+        <li>
+          <a class="artist-row" href={`/panel/eventos/${e._id}`}>
+            <span class="artist-text">
+              <span class="artist-name">{e.title}</span>
+              <span class="artist-meta">{shortDateTime(e.startsAt)} · {STATE[e.status]}{pendBy.get(String(e._id)) ? ` · ${pendBy.get(String(e._id))} por revisar` : ''}</span>
+            </span>
+            <span class="row-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a class="btn-ghost center" href="/puerta">Abrir escáner de puerta</a>
+  </section>
+
+  <form class="card form" data-api="/api/admin/events" data-image-url="/api/admin/events/{id}/image" data-then="redirect:/panel/eventos/{id}">
+    <span class="form-label">Nuevo evento</span>
+    <ImageField kind="event" />
+    <EventFields isNew />
+    <p class="msg" data-status hidden></p>
+    <button type="submit" class="btn-primary">Crear evento</button>
+  </form>
+
+  <details class="card">
+    <summary>Datos de transferencia{!p.accountNumber && ' · ⚠ sin completar'}</summary>
+    <form class="form" data-api="/api/admin/payment" data-method="PUT">
+      <p class="form-hint">Se muestran al comprador. Sin número de cuenta y titular, la venta no se abre.</p>
+      <div class="form-2">
+        <label>Banco<input name="bank" maxlength="60" value={p.bank} /></label>
+        <label>Tipo de cuenta<input name="accountType" maxlength="40" placeholder="Cuenta corriente" value={p.accountType} /></label>
+      </div>
+      <div class="form-2">
+        <label>N° de cuenta<input name="accountNumber" maxlength="40" value={p.accountNumber} /></label>
+        <label>RUT del titular<input name="rut" maxlength="20" value={p.rut} /></label>
+      </div>
+      <label>Titular<input name="holder" maxlength="80" value={p.holder} /></label>
+      <label>Correo para el aviso<input type="email" name="email" maxlength="120" value={p.email} /></label>
+      <label>Nota (opcional)<input name="note" maxlength="300" placeholder="Indica tu nombre en el comentario de la transferencia" value={p.note} /></label>
+      <p class="msg" data-status hidden></p>
+      <button type="submit" class="btn-primary">Guardar datos</button>
+    </form>
+  </details>
+
+  <details class="card">
+    <summary>Personal de puerta ({staff.filter((u) => u.active).length})</summary>
+    <div class="form">
+      <p class="form-hint">Estas cuentas solo pueden escanear entradas en <a href="/puerta">/puerta</a>. Desactívalas cuando termine el evento.</p>
+      {staff.map((u) => (
+        <form class="door-found" data-api={`/api/admin/staff/${u._id}`} data-method="PUT" data-then="reload">
+          <span><strong>{u.email}</strong><small>{u.lastLoginAt ? `Último ingreso ${shortDateTime(u.lastLoginAt)}` : 'Nunca ha ingresado'}</small></span>
+          <input type="checkbox" name="active" checked={!u.active} hidden />
+          <button type="submit" class="btn-link">{u.active ? 'Desactivar' : 'Activar'}</button>
+        </form>
+      ))}
+      <form class="form" data-api="/api/admin/staff" data-then="account">
+        <label>Correo<input type="email" name="email" required /></label>
+        <p class="msg" data-status hidden></p>
+        <button type="submit" class="btn-primary">Crear cuenta / reiniciar contraseña</button>
+        <p class="msg msg-ok" data-result hidden></p>
+      </form>
+    </div>
+  </details>
+</Panel>

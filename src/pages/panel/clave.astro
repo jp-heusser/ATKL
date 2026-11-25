@@ -1,0 +1,15 @@
+---
+import Panel from '../../layouts/Panel.astro';
+import { guard } from '../../../server/panel.js';
+const deny = guard(Astro);
+if (deny) return deny;
+---
+<Panel title="Contraseña" heading="Cambiar contraseña">
+  <form class="card form" data-api="/api/auth/password" data-ok="Contraseña cambiada ✓" data-reset>
+    <label>Contraseña actual<input type="password" name="current" autocomplete="current-password" required /></label>
+    <label>Nueva (mínimo 10 caracteres)<input type="password" name="next" autocomplete="new-password" required minlength="10" /></label>
+    <p class="msg" data-status hidden></p>
+    <button type="submit" class="btn-primary">Cambiar</button>
+  </form>
+  <a class="form-hint center" href={Astro.locals.user.role === 'door' ? '/puerta' : '/panel'}>← Volver</a>
+</Panel>

@@ -1,0 +1,111 @@
+---
+/* Ventas: revisar comprobantes, aprobar, rechazar y anular pedidos. */
+import Panel from '../../layouts/Panel.astro';
+import { guard, pendingCount } from '../../../server/panel.js';
+import Order from '../../../server/models/Order.js';
+import Event from '../../../server/models/Event.js';
+import { clp, shortDateTime, STATUS } from '../../lib/format.js';
+
+const deny = guard(Astro, ['admin']);
+if (deny) return deny;
+
+const sp = Astro.url.searchParams;
+const status = sp.has('status') ? sp.get('status') : 'pending';
+const eventId = sp.get('event') || '';
+const text = (sp.get('q') || '').trim();
+const q = {};
+if (['pending', 'approved', 'rejected', 'cancelled'].includes(status)) q.status = status;
+if (/^[a-f0-9]{24}$/.test(eventId)) q.event = eventId;
+if (text) {
+  const rx = new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  q.$or = [{ code: rx }, { 'buyer.name': rx }, { 'buyer.email': rx }, { 'buyer.doc': rx }];
+}
+const [orders, events, pending] = await Promise.all([
+  Order.find(q).sort({ createdAt: -1 }).limit(200).lean(),
+  Event.find().sort({ startsAt: -1 }).select('title').lean(),
+  pendingCount(),
+]);
+const titles = new Map(events.map((e) => [String(e._id), e.title]));
+---
+<Panel title="Ventas" heading="Administración" active="ventas" pending={pending}>
+  <form class="card form" method="get" action="/panel/ventas">
+    <div class="form-2">
+      <label>
+        Estado
+        <select name="status" onchange="this.form.submit()">
+          <option value="pending" selected={status === 'pending'}>En revisión</option>
+          <option value="approved" selected={status === 'approved'}>Aprobados</option>
+          <option value="rejected" selected={status === 'rejected'}>Rechazados</option>
+          <option value="cancelled" selected={status === 'cancelled'}>Anulados</option>
+          <option value="" selected={status === ''}>Todos</option>
+        </select>
+      </label>
+      <label>
+        Evento
+        <select name="event" onchange="this.form.submit()">
+          <option value="">Todos</option>
+          {events.map((e) => <option value={String(e._id)} selected={String(e._id) === eventId}>{e.title}</option>)}
+        </select>
+      </label>
+    </div>
+    <label>Buscar<input name="q" value={text} placeholder="Código, nombre, correo o RUT" /></label>
+  </form>
+
+  {orders.length === 0 && <p class="form-hint center">No hay pedidos {status === 'pending' ? 'por revisar' : 'con este filtro'}.</p>}
+
+  {orders.map((o) => {
+    const st = STATUS[o.status];
+    const id = String(o._id);
+    return (
+      <article class="card order-card" data-card>
+        <header>
+          <span class="mono">{o.code}</span>
+          <span class:list={['status-badge', st.cls]}>{st.label}</span>
+        </header>
+        <p class="oc-main">
+          <span><strong>{o.quantity} × {o.typeName}</strong> · {clp(o.total)}</span>
+          <small>{titles.get(String(o.event)) || ''}</small>
+        </p>
+        <p class="oc-buyer">
+          <strong>{o.buyer.name}</strong>
+          <span>{o.buyer.doc} · {o.buyer.email}{o.buyer.phone ? ` · ${o.buyer.phone}` : ''}</span>
+          <small>Enviado {shortDateTime(o.createdAt)}{o.reviewedAt ? ` · revisado ${shortDateTime(o.reviewedAt)}` : ''}</small>
+        </p>
+        {o.note && <p class="form-hint">Nota: {o.note}</p>}
+
+        <button type="button" class="btn-ghost" data-proof={`/api/admin/orders/${id}/proof`}>Ver comprobante</button>
+        <div hidden>
+        </div>
+        {o.status === 'pending' && <p class="form-hint">Revisa que el monto sea <strong>{clp(o.total)}</strong>, que la fecha sea reciente y que el dinero haya llegado a la cuenta.</p>}
+
+        {o.status === 'pending' && (
+          <div class="oc-actions">
+            <button type="button" class="btn-primary" data-action-url={`/api/admin/orders/${id}/approve`} data-ok="Aprobado: entradas generadas ✓">Aprobar pago</button>
+            <button type="button" class="btn-ghost" data-toggle={`#rej-${id}`}>Rechazar</button>
+          </div>
+        )}
+        {o.status === 'pending' && (
+          <form class="form" id={`rej-${id}`} hidden data-api={`/api/admin/orders/${id}/reject`} data-then="reload">
+            <label>Motivo del rechazo (lo verá el comprador)<input name="reason" maxlength="300" placeholder="El monto no coincide…" /></label>
+            <div class="oc-actions">
+              <button type="submit" class="btn-primary">Confirmar rechazo</button>
+              <button type="button" class="btn-link" data-toggle={`#rej-${id}`}>Cancelar</button>
+            </div>
+          </form>
+        )}
+        {o.status === 'approved' && <button type="button" class="btn-link" data-toggle={`#void-${id}`}>Anular pedido…</button>}
+        {o.status === 'approved' && (
+          <form class="form" id={`void-${id}`} hidden data-api={`/api/admin/orders/${id}/void`} data-then="reload">
+            <label>Motivo de la anulación (lo verá el comprador)<input name="reason" maxlength="300" placeholder="Devolución solicitada…" /></label>
+            <p class="form-hint">Las entradas de este pedido dejarán de servir en la puerta y los cupos vuelven a la venta.</p>
+            <div class="oc-actions">
+              <button type="submit" class="btn-primary">Confirmar anulación</button>
+              <button type="button" class="btn-link" data-toggle={`#void-${id}`}>Cancelar</button>
+            </div>
+          </form>
+        )}
+        <p class="msg" data-status hidden></p>
+      </article>
+    );
+  })}
+</Panel>

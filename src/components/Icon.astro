@@ -1,0 +1,15 @@
+---
+/* Ícono de plataforma (SVG de Simple Icons o genérico de línea) o una sigla si no hay ícono. */
+const { icon, badge, size = 18 } = Astro.props;
+---
+{icon ? (
+  <svg class="pf-icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+    {icon.stroke ? (
+      <path d={icon.path} fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    ) : (
+      <path d={icon.path} fill="currentColor" />
+    )}
+  </svg>
+) : (
+  <span class="pf-badge" aria-hidden="true">{badge}</span>
+)}

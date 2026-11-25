@@ -1,6 +1,6 @@
 /* Venta de entradas: rutas públicas (sin cuenta). */
-import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import { Router } from '../router.js';
+import rateLimit from '../router.js';
 import Event from '../models/Event.js';
 import TicketType from '../models/TicketType.js';
 import Order from '../models/Order.js';
@@ -71,15 +71,21 @@ router.get('/events/:id/image/full', async (req, res) => {
   sendBin(res, img.fullType, img.fullData);
 });
 
-// Un evento con sus tipos de entrada y los datos para transferir.
-router.get('/events/:slug', async (req, res) => {
-  const event = await Event.findOne({ slug: String(req.params.slug).toLowerCase(), ...VISIBLE }).lean();
-  if (!event) return res.status(404).json({ error: 'Evento no encontrado' });
+// Un evento visible con sus tipos de entrada y los datos para transferir, o null.
+export async function getEventPage(slug) {
+  const event = await Event.findOne({ slug: String(slug).toLowerCase(), ...VISIBLE }).lean();
+  if (!event) return null;
   const [types, label] = await Promise.all([
     TicketType.find({ event: event._id, active: true }).sort({ order: 1, price: 1 }).lean(),
     Label.findOne({ key: 'main' }).select('payment').lean(),
   ]);
-  res.json({ event: publicEvent(event), types: types.map(publicType), payment: label?.payment || null });
+  return { event: publicEvent(event), types: types.map(publicType), payment: label?.payment || null };
+}
+
+router.get('/events/:slug', async (req, res) => {
+  const data = await getEventPage(req.params.slug);
+  if (!data) return res.status(404).json({ error: 'Evento no encontrado' });
+  res.json(data);
 });
 
 // Crear pedido: datos del comprador + comprobante. Reserva las entradas hasta que se revise el pago.
@@ -142,18 +148,17 @@ router.post('/orders', limiter(10, 15, 'Demasiados pedidos seguidos. Espera unos
   res.status(201).json({ code: order.code, token });
 });
 
-// Estado del pedido (link privado del comprador).
-router.get('/orders/:token', limiter(60, 1, 'Demasiadas consultas. Espera un momento.'), async (req, res) => {
-  const token = String(req.params.token || '').toLowerCase();
-  if (!/^[a-f0-9]{64}$/.test(token)) return res.status(404).json({ error: 'Pedido no encontrado' });
+// Pedido visto por el comprador (link privado), o null.
+export async function getOrderView(token) {
+  token = String(token || '').toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(token)) return null;
   const order = await Order.findOne({ tokenHash: sha256(token) }).lean();
-  if (!order) return res.status(404).json({ error: 'Pedido no encontrado' });
+  if (!order) return null;
   const [event, tickets] = await Promise.all([
     Event.findById(order.event).lean(),
     order.status === 'approved' ? Ticket.find({ order: order._id }).sort({ _id: 1 }).lean() : [],
   ]);
-  res.set('Cache-Control', 'no-store');
-  res.json({
+  return {
     code: order.code,
     status: order.status,
     note: order.status === 'pending' ? '' : order.note,
@@ -164,7 +169,15 @@ router.get('/orders/:token', limiter(60, 1, 'Demasiadas consultas. Espera un mom
     total: order.total,
     buyer: { name: order.buyer.name, email: order.buyer.email },
     tickets: tickets.map((t) => ({ code: t.code, typeName: t.typeName, holder: t.holder, status: t.status })),
-  });
+  };
+}
+
+// Estado del pedido (link privado del comprador).
+router.get('/orders/:token', limiter(60, 1, 'Demasiadas consultas. Espera un momento.'), async (req, res) => {
+  const view = await getOrderView(req.params.token);
+  if (!view) return res.status(404).json({ error: 'Pedido no encontrado' });
+  res.set('Cache-Control', 'no-store');
+  res.json(view);
 });
 
 export default router;

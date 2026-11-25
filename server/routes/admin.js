@@ -1,5 +1,5 @@
 /* Administración: sello, artistas y cuentas. Solo rol "admin". */
-import { Router } from 'express';
+import { Router } from '../router.js';
 import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
 import User from '../models/User.js';

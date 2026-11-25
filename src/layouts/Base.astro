@@ -1,0 +1,61 @@
+---
+/* Estructura común: <head> con vista previa al compartir, fondo de rayos, botón de tema y pie. */
+import '../styles/global.css';
+
+const {
+  title = 'ATKL Records',
+  description = 'Label and collective of Techno and Hard Techno, Chilean based.',
+  image = '/og-image.jpg',
+  noindex = false,
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
+const ogImage = new URL(image, Astro.url.origin).href;
+---
+<!doctype html>
+<html lang="es" data-theme="dark" style="background:#000">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ATKL Records" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script is:inline>
+      // Tema antes de pintar: oscuro por defecto; claro solo si se eligió con el botón.
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('atkl_theme') === 'light' ? 'light' : 'dark';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <canvas id="lightning" class="particles" aria-hidden="true"></canvas>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Cambiar a modo claro">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <g class="ic-sun"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></g>
+        <path class="ic-moon" hidden d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" />
+      </svg>
+    </button>
+    <div id="root">
+      <slot />
+      <footer class="site-footer">
+        <a href="/">ATKL Records</a> · {new Date().getFullYear()} · <a href="/acceso">Acceso</a>
+      </footer>
+    </div>
+    <script>
+      import '../scripts/site.js';
+    </script>
+  </body>
+</html>

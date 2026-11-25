@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import LinkItem from '../components/LinkItem.astro';
+import SocialIcons from '../components/SocialIcons.astro';
+import Avatar from '../components/Avatar.astro';
+import EventMedia from '../components/EventMedia.astro';
+import { safe } from '../../server/pages.js';
+import { getHub } from '../../server/routes/public.js';
+import { isValidLink } from '../lib/platforms.js';
+import { dayMonth } from '../lib/format.js';
+import { photoUrl } from '../lib/media.js';
+import { label as localLabel } from '../data/label.js';
+import { artists as localArtists } from '../data/artists.js';
+
+// Datos desde MongoDB; si la base no responde, los de src/data (la portada nunca queda en blanco).
+const hub = (await safe(getHub)) || { label: localLabel, artists: localArtists, events: [] };
+const { label, artists, events } = hub;
+const links = (label.links || []).filter(isValidLink);
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=300');
+---
+<Base title={label.name} description={label.bio}>
+  <main class="page">
+    <header class="label-head">
+      <div class="logo-wrap">
+        <img class="logo" src="/logo-atkl.webp" alt="" width="960" height="606" />
+        <img class="logo logo-ghost" src="/logo-atkl.webp" alt="" aria-hidden="true" />
+      </div>
+      <h1 class="label-name">{label.name}</h1>
+      <p class="label-bio">{label.bio}</p>
+      <SocialIcons links={label.socials} label="Redes de ATKL Records" />
+    </header>
+
+    {events.length > 0 && (
+      <section class="events" aria-labelledby="events-title">
+        <h2 id="events-title">Próximos eventos</h2>
+        {events.map((e) => {
+          const d = dayMonth(e.startsAt);
+          return (
+            <a class:list={['event-card', 'rise', { 'has-img': e.image }]} href={`/evento/${e.slug}`}>
+              {e.image && <EventMedia src={photoUrl(e.image)} variant="card" lazy />}
+              <span class="ev-row">
+                <span class="ev-date"><strong>{d.day}</strong><small>{d.month}</small></span>
+                <span class="ev-text">
+                  <strong>{e.title}</strong>
+                  <small>{[e.venue, e.city].filter(Boolean).join(' · ')}</small>
+                </span>
+                <span class="ev-cta">{e.onSale ? 'Entradas' : 'Venta cerrada'}</span>
+              </span>
+            </a>
+          );
+        })}
+      </section>
+    )}
+
+    <div class="link-stack">
+      {links.map((entry, i) => (
+        <div class="rise" style={`animation-delay:${80 + i * 55}ms`}>
+          <LinkItem entry={entry} />
+        </div>
+      ))}
+    </div>
+
+    {artists.length > 0 && (
+      <details class="artists-box">
+        <summary>
+          <span>Artistas</span>
+          <span class="summary-right"><span class="count">{artists.length}</span><span class="chev" aria-hidden="true">↓</span></span>
+        </summary>
+        <ul class="artist-list">
+          {artists.map((a) => (
+            <li>
+              <a class="artist-row" href={`/${a.slug}`}>
+                <Avatar artist={a} size={40} />
+                <span class="artist-text">
+                  <span class="artist-name">{a.name}</span>
+                  {(a.role || a.city) && <span class="artist-meta">{[a.role, a.city].filter(Boolean).join(' · ')}</span>}
+                </span>
+                <span class="row-arrow" aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    )}
+  </main>
+  <script is:inline>
+    // Links antiguos con "#" (…/#desmont-landvik): el "#" no llega al servidor, se corrige aquí.
+    (function () {
+      var h = decodeURIComponent(location.hash.replace(/^#\/?/, '')).toLowerCase();
+      if (/^[a-z0-9]+(-[a-z0-9]+)*(\/[a-z0-9-]+)?$/.test(h)) location.replace('/' + h);
+    })();
+  </script>
+</Base>

@@ -1,0 +1,15 @@
+---
+import Icon from './Icon.astro';
+import { resolveLink, isValidLink } from '../lib/platforms.js';
+const { links = [], label } = Astro.props;
+const list = links.filter(isValidLink).map(resolveLink);
+---
+{list.length > 0 && (
+  <nav class="label-socials" aria-label={label}>
+    {list.map((l) => (
+      <a href={l.url} aria-label={l.name} title={l.name} {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+        <Icon icon={l.icon} badge={l.badge} size={19} />
+      </a>
+    ))}
+  </nav>
+)}

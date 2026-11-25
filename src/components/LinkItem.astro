@@ -1,0 +1,42 @@
+---
+/* Un enlace: reproductor incrustado (YouTube, SoundCloud, Instagram) si se pidió y la URL lo permite; si no, botón. */
+import Icon from './Icon.astro';
+import { resolveLink } from '../lib/platforms.js';
+import { getEmbed } from '../lib/embeds.js';
+
+const { entry } = Astro.props;
+const embed = typeof entry !== 'string' && entry.embed ? getEmbed(entry.url) : null;
+const l = embed ? null : resolveLink(entry);
+const label = typeof entry === 'string' ? '' : entry.label;
+---
+{embed ? (
+  <figure class:list={['embed', `embed-${embed.type}`, { 'embed-vertical': embed.ratio === '9 / 16' }]}>
+    {label && <figcaption class="embed-caption">{label}</figcaption>}
+    {embed.type === 'instagram' ? (
+      <div class="embed-ig" data-ig>
+        <blockquote class="instagram-media" data-instgrm-permalink={embed.permalink} data-instgrm-version="14">
+          <a href={embed.permalink} target="_blank" rel="noopener noreferrer">Ver publicación en Instagram ↗</a>
+        </blockquote>
+      </div>
+    ) : (
+      <iframe
+        src={embed.src}
+        title={label || embed.name}
+        loading="lazy"
+        style={embed.ratio ? `aspect-ratio: ${embed.ratio}` : `height: ${embed.height}px`}
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    )}
+  </figure>
+) : (
+  <a class="link-btn" href={l.url} {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+    <Icon icon={l.icon} badge={l.badge} />
+    <span class="link-text">
+      <span class="link-name">{l.name}</span>
+      {l.detail && <span class="link-detail">{l.detail}</span>}
+    </span>
+    <span class="link-arrow" aria-hidden="true">↗</span>
+  </a>
+)}

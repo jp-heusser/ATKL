@@ -1,0 +1,18 @@
+---
+/* Páginas del panel: exige sesión (y rol, si se indica). */
+import Base from './Base.astro';
+import PanelNav from '../components/panel/PanelNav.astro';
+const { title, active, pending = 0, heading, subtitle } = Astro.props;
+const user = Astro.locals.user;
+---
+<Base title={`${title} · Panel ATKL`} noindex>
+  <main class="page panel">
+    <PanelNav user={user} active={active} pending={pending} />
+    {heading && <h1 class="form-title">{heading}</h1>}
+    <p class="form-hint">{subtitle || user?.email}</p>
+    <slot />
+  </main>
+  <script>
+    import '../scripts/panel.js';
+  </script>
+</Base>

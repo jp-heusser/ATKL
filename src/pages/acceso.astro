@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+const user = Astro.locals.user;
+const next = Astro.url.searchParams.get('next') || '';
+const safeNext = /^\/(panel|puerta)(\/|$|\?)/.test(next) ? next : '';
+if (user) return Astro.redirect(user.role === 'door' ? '/puerta' : safeNext || '/panel');
+---
+<Base title="Acceso · ATKL Records" noindex>
+  <main class="page">
+    <nav class="back"><a href="/">← ATKL Records</a></nav>
+    <form class="card form" id="login" data-next={safeNext}>
+      <h1 class="form-title">Acceso</h1>
+      <p class="form-hint">Para artistas y equipo de ATKL.</p>
+      <label>Correo<input type="email" name="email" autocomplete="username" required /></label>
+      <label>Contraseña<input type="password" name="password" autocomplete="current-password" required /></label>
+      <p class="msg msg-error" role="alert" hidden></p>
+      <button class="btn-primary">Entrar</button>
+    </form>
+  </main>
+  <script>
+    const form = document.getElementById('login');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button');
+      const err = form.querySelector('.msg');
+      btn.disabled = true;
+      btn.textContent = 'Entrando…';
+      err.hidden = true;
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: form.email.value, password: form.password.value }),
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || 'No se pudo iniciar sesión');
+        location.href = d.user.role === 'door' ? '/puerta' : form.dataset.next || '/panel';
+      } catch (ex) {
+        err.textContent = ex.message === 'Failed to fetch' ? 'No se pudo conectar con el servidor' : ex.message;
+        err.hidden = false;
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+  </script>
+</Base>

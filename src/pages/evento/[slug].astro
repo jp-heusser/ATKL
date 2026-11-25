@@ -1,0 +1,149 @@
+---
+/* Página de un evento con la compra por transferencia: /evento/grooveland-apocalypse */
+import Base from '../../layouts/Base.astro';
+import EventMedia from '../../components/EventMedia.astro';
+import { safe } from '../../../server/pages.js';
+import { getEventPage } from '../../../server/routes/tickets.js';
+import { clp, fullDate } from '../../lib/format.js';
+import { photoUrl } from '../../lib/media.js';
+
+const slug = String(Astro.params.slug || '').toLowerCase();
+const data = await safe(() => getEventPage(slug));
+if (!data) return Astro.rewrite('/404');
+
+const { event, types, payment: pay } = data;
+const payReady = !!(pay?.accountNumber && pay?.holder);
+const first = types.find((t) => !t.soldOut);
+const extHost = (() => {
+  try {
+    return new URL(event.ticketUrl).hostname.replace(/^www\./, '');
+  } catch {
+    return 'línea';
+  }
+})();
+const where = [event.venue, event.address, event.city].filter(Boolean).join(' · ');
+const payRows = [
+  ['Banco', pay?.bank],
+  ['Tipo de cuenta', pay?.accountType],
+  ['N° de cuenta', pay?.accountNumber],
+  ['Titular', pay?.holder],
+  ['RUT', pay?.rut],
+  ['Correo', pay?.email],
+].filter(([, v]) => v);
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=30, stale-while-revalidate=120');
+---
+<Base title={`${event.title} — Entradas · ATKL Records`} description={`${fullDate(event.startsAt)} · ${where}`} image={event.image ? photoUrl(event.image) : undefined}>
+  <main class="page">
+    <nav class="back"><a href="/">← ATKL Records</a></nav>
+
+    <header class="event-head">
+      <span class="event-kicker">Entradas</span>
+      <h1 class="artist-title">{event.title}</h1>
+      <p class="event-when">{fullDate(event.startsAt)}</p>
+      <p class="artist-meta">{where}</p>
+      {event.image && (
+        <button type="button" class="ev-hero-btn" data-lightbox={photoUrl(event.imageFull || event.image)} data-alt={`Imagen de ${event.title}`} aria-label="Ver imagen en grande">
+          <EventMedia src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} variant="hero" />
+          <span class="ev-zoom-hint" aria-hidden="true">⤢</span>
+        </button>
+      )}
+      {event.description && <p class="event-desc">{event.description}</p>}
+    </header>
+
+    {event.onSale && event.ticketUrl && (
+      <a class="btn-primary ext-buy" href={event.ticketUrl} target="_blank" rel="noopener noreferrer">Comprar entradas en {extHost} ↗</a>
+    )}
+
+    {!event.onSale ? (
+      <div class="maintenance"><span class="maintenance-tag">Venta cerrada</span><p>La venta de entradas para este evento terminó.</p></div>
+    ) : types.length === 0 ? (
+      !event.ticketUrl && <div class="maintenance"><span class="maintenance-tag">Pronto</span><p>La venta abre muy pronto. Síguenos en Instagram para enterarte.</p></div>
+    ) : !payReady ? (
+      !event.ticketUrl && <div class="maintenance"><span class="maintenance-tag">Pronto</span><p>La venta abre muy pronto. Síguenos en Instagram para enterarte.</p></div>
+    ) : (
+      <form class="buy" id="buy" data-event={event.slug} novalidate>
+        {event.ticketUrl && <p class="form-hint center">O compra aquí pagando por transferencia:</p>}
+
+        <section class="card form">
+          <span class="step">1</span>
+          <span class="form-label">Elige tu entrada</span>
+          <div class="tt-list" role="radiogroup">
+            {types.map((t) => (
+              <label class:list={['tt-option', { 'is-out': t.soldOut, 'is-on': t.id === first?.id }]}>
+                <input type="radio" name="ticketType" value={t.id} checked={t.id === first?.id} disabled={t.soldOut} data-price={t.price} data-max={t.maxPerOrder} />
+                <span class="tt-text">
+                  <strong>{t.name}</strong>
+                  {t.description && <small>{t.description}</small>}
+                </span>
+                <span class="tt-price">
+                  {t.soldOut ? 'Agotado' : clp(t.price)}
+                  {t.low && <small>Últimas</small>}
+                </span>
+              </label>
+            ))}
+          </div>
+          <div class="qty-row">
+            <label>
+              Cantidad
+              <select name="quantity"></select>
+            </label>
+            <div class="total"><small>Total</small><strong data-total>—</strong></div>
+          </div>
+        </section>
+
+        <section class="card form">
+          <span class="step">2</span>
+          <span class="form-label">Tus datos</span>
+          <label>Nombre completo<input name="name" required minlength="3" maxlength="100" autocomplete="name" /></label>
+          <label>Correo<input name="email" type="email" required maxlength="120" autocomplete="email" /></label>
+          <div class="form-2">
+            <label>RUT o pasaporte<input name="doc" required maxlength="20" placeholder="12.345.678-5" /></label>
+            <label>Teléfono (opcional)<input name="phone" type="tel" maxlength="30" autocomplete="tel" /></label>
+          </div>
+        </section>
+
+        <section class="card form">
+          <span class="step">3</span>
+          <span class="form-label">Transfiere <span data-total>—</span></span>
+          <div class="pay-box">
+            {payRows.map(([k, v]) => (
+              <div class="pay-row">
+                <span class="pay-label">{k}</span>
+                <span class="pay-value">{v}</span>
+                <button type="button" class="btn-link" data-copy={v}>Copiar</button>
+              </div>
+            ))}
+            <div class="pay-row">
+              <span class="pay-label">Monto</span>
+              <span class="pay-value" data-amount>—</span>
+              <button type="button" class="btn-link" data-copy="" data-amount-copy>Copiar</button>
+            </div>
+          </div>
+          {pay.note && <p class="form-hint">{pay.note}</p>}
+        </section>
+
+        <section class="card form">
+          <span class="step">4</span>
+          <span class="form-label">Sube el comprobante</span>
+          <p class="form-hint">Captura de pantalla o foto de la transferencia, donde se vea el monto y la fecha.</p>
+          <label class="file-drop">
+            <input type="file" name="proof" accept="image/*" />
+            <span data-proof-empty>Elegir imagen</span>
+            <img data-proof-preview alt="Comprobante seleccionado" hidden />
+          </label>
+          <p class="msg msg-error" data-proof-error hidden></p>
+          <label class="check">
+            <input type="checkbox" name="accept" required />
+            Confirmo que transferí el monto exacto y que mis datos son correctos. Las entradas se activan cuando validemos el pago.
+          </label>
+          <p class="msg msg-error" role="alert" data-error hidden></p>
+          <button class="btn-primary" data-submit>Enviar pedido</button>
+        </section>
+      </form>
+    )}
+  </main>
+  <script>
+    import { initBuy } from '../../scripts/buy.js';
+    initBuy();
+  </script>
+</Base>

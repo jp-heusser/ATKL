@@ -1,5 +1,5 @@
 /* API pública (solo lectura). */
-import { Router } from 'express';
+import { Router } from '../router.js';
 import Label from '../models/Label.js';
 import Artist from '../models/Artist.js';
 import Photo from '../models/Photo.js';
@@ -14,31 +14,34 @@ const present = ({ instagram, ...a }) => ({ ...a, socials: a.socials || [], link
 router.get('/health', (_req, res) => res.json({ ok: true }));
 
 // Todo lo que necesita la web en una sola llamada.
-router.get('/hub', async (_req, res, next) => {
-  try {
-    const [label, artists, events] = await Promise.all([
-      Label.findOne({ key: 'main' }).select('name bio socials links -_id').lean(),
-      Artist.find({ active: true }).select(ARTIST_FIELDS).sort({ order: 1, name: 1 }).lean(),
-      Event.find({ status: { $in: ['published', 'closed'] }, startsAt: { $gte: new Date(Date.now() - 12 * 3600e3) } }).sort({ startsAt: 1 }).limit(6).lean(),
-    ]);
-    if (!label) return res.status(404).json({ error: 'Sin datos del sello. Ejecuta: npm run seed' });
-    res.set('Cache-Control', 'public, max-age=60');
-    res.json({ label, artists: artists.map(present), events: events.map(publicEvent) });
-  } catch (e) {
-    next(e);
-  }
+// Datos de la portada: sello, artistas visibles y próximos eventos. null si falta el sello.
+export async function getHub() {
+  const [label, artists, events] = await Promise.all([
+    Label.findOne({ key: 'main' }).select('name bio socials links -_id').lean(),
+    Artist.find({ active: true }).select(ARTIST_FIELDS).sort({ order: 1, name: 1 }).lean(),
+    Event.find({ status: { $in: ['published', 'closed'] }, startsAt: { $gte: new Date(Date.now() - 12 * 3600e3) } }).sort({ startsAt: 1 }).limit(6).lean(),
+  ]);
+  if (!label) return null;
+  return { label, artists: artists.map(present), events: events.map(publicEvent) };
+}
+
+// Un artista visible por su slug, o null.
+export async function getArtist(slug) {
+  const artist = await Artist.findOne({ slug: String(slug).toLowerCase(), active: true }).select(ARTIST_FIELDS).lean();
+  return artist ? present(artist) : null;
+}
+
+router.get('/hub', async (_req, res) => {
+  const hub = await getHub();
+  if (!hub) return res.status(404).json({ error: 'Sin datos del sello. Ejecuta: npm run seed' });
+  res.set('Cache-Control', 'public, max-age=60');
+  res.json(hub);
 });
 
-router.get('/artists/:slug', async (req, res, next) => {
-  try {
-    const artist = await Artist.findOne({ slug: String(req.params.slug).toLowerCase(), active: true })
-      .select(ARTIST_FIELDS)
-      .lean();
-    if (!artist) return res.status(404).json({ error: 'Artista no encontrado' });
-    res.json(present(artist));
-  } catch (e) {
-    next(e);
-  }
+router.get('/artists/:slug', async (req, res) => {
+  const artist = await getArtist(req.params.slug);
+  if (!artist) return res.status(404).json({ error: 'Artista no encontrado' });
+  res.json(artist);
 });
 
 // Fotos de perfil (guardadas en la base).

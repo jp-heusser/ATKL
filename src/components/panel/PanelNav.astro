@@ -1,0 +1,26 @@
+---
+/* Encabezado del panel: volver, cerrar sesión y pestañas (admin). */
+const { user, active = '', pending = 0 } = Astro.props;
+const tabs = [
+  ['ventas', 'Ventas', '/panel/ventas'],
+  ['eventos', 'Eventos', '/panel/eventos'],
+  ['artistas', 'Artistas', '/panel/artistas'],
+  ['sello', 'Sello', '/panel/sello'],
+];
+---
+<nav class="back panel-bar">
+  <a href="/">← ATKL Records</a>
+  <span class="panel-links">
+    <a class="btn-link" href="/panel/clave">Contraseña</a>
+    <button type="button" class="btn-link" data-logout>Cerrar sesión</button>
+  </span>
+</nav>
+{user.role === 'admin' && (
+  <div class="tabs" role="tablist">
+    {tabs.map(([k, label, href]) => (
+      <a role="tab" href={href} aria-selected={k === active ? 'true' : 'false'} aria-current={k === active ? 'page' : undefined}>
+        {label}{k === 'ventas' && pending > 0 && <span class="tab-badge">{pending}</span>}
+      </a>
+    ))}
+  </div>
+)}

@@ -1,0 +1,9 @@
+---
+/* Foto del artista; si no tiene (o no carga) se muestran sus iniciales. */
+import { photoUrl } from '../lib/media.js';
+const { artist, size = 48, id } = Astro.props;
+const initials = (artist.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+const style = `width:${size}px;height:${size}px`;
+---
+{artist.photo && <img class="avatar" data-fallback id={id} style={style} src={photoUrl(artist.photo)} alt="" loading="lazy" width={size} height={size} />}
+<span class="avatar avatar-initials" style={`${style};font-size:${size * 0.34}px`} aria-hidden="true" hidden={!!artist.photo}>{initials}</span>

@@ -1,0 +1,71 @@
+---
+/* Puerta: escanear y validar entradas. Roles: door o admin. */
+import Base from '../layouts/Base.astro';
+import { guard } from '../../server/panel.js';
+import Event from '../../server/models/Event.js';
+import Ticket from '../../server/models/Ticket.js';
+import { shortDateTime } from '../lib/format.js';
+
+const deny = guard(Astro, ['door', 'admin']);
+if (deny) return deny;
+const user = Astro.locals.user;
+const events = await Event.find({ status: { $in: ['published', 'closed'] }, startsAt: { $gte: new Date(Date.now() - 24 * 3600e3) } })
+  .sort({ startsAt: 1 })
+  .limit(10)
+  .select('title startsAt')
+  .lean();
+---
+<Base title="Puerta · ATKL" noindex>
+  <main class="page door">
+    <nav class="back panel-bar">
+      <a href={user.role === 'admin' ? '/panel/eventos' : '/'}>← {user.role === 'admin' ? 'Panel' : 'ATKL Records'}</a>
+      <span class="panel-links">
+        <a class="btn-link" href="/panel/clave">Contraseña</a>
+        <button type="button" class="btn-link" id="logout">Cerrar sesión</button>
+      </span>
+    </nav>
+    <h1 class="form-title">Puerta</h1>
+    <p class="form-hint">{user.email}</p>
+
+    <div class="card form">
+      <label>
+        Evento
+        <select id="event">
+          {events.length === 0 && <option value="">No hay eventos próximos</option>}
+          {events.map((x) => <option value={String(x._id)}>{x.title} · {shortDateTime(x.startsAt)}</option>)}
+        </select>
+      </label>
+      <p class="door-count" id="count" hidden><strong>0</strong> / <span>0</span> ingresados</p>
+    </div>
+
+    <div class="door-cam" id="cam">
+      <video playsinline muted></video>
+      <span class="door-frame" aria-hidden="true" hidden></span>
+      <button type="button" class="btn-primary" id="start" disabled={events.length === 0}>Escanear QR</button>
+    </div>
+    <button type="button" class="btn-link center" id="stop" hidden>Detener cámara</button>
+    <p class="msg msg-error" id="cam-error" hidden></p>
+
+    <div class="door-result" id="result" role="status" aria-live="assertive" hidden>
+      <strong></strong>
+      <span data-r="holder"></span>
+      <span data-r="type"></span>
+      <span data-r="extra"></span>
+      <small></small>
+    </div>
+
+    <form class="card form" id="manual">
+      <span class="form-label">Búsqueda manual</span>
+      <p class="form-hint">Si el QR no se lee: código del pedido (ATK-…), RUT o el código de la entrada.</p>
+      <div class="ig-row">
+        <input name="q" placeholder="ATK-XXXXXX o 12345678-5" />
+        <button class="btn-primary">Buscar</button>
+      </div>
+      <div id="found"></div>
+    </form>
+  </main>
+  <script>
+    import { initDoor } from '../scripts/door.js';
+    initDoor();
+  </script>
+</Base>

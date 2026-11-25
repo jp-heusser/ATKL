@@ -1,0 +1,33 @@
+---
+/* Una fila del editor de enlaces: URL, nombre, ícono, "mostrar incrustado", subir/bajar/quitar. */
+import Icon from '../Icon.astro';
+import { resolveLink, ICON_CHOICES } from '../../lib/platforms.js';
+import { getEmbed } from '../../lib/embeds.js';
+
+const { l = { url: '', label: '', icon: '', embed: false }, allowEmbed = true, labelPlaceholder = 'Nombre (opcional)' } = Astro.props;
+const valid = /^(https:\/\/|mailto:)/.test(l.url || '');
+const info = valid ? resolveLink({ url: l.url, icon: l.icon }) : null;
+const embed = allowEmbed && valid ? getEmbed(l.url) : null;
+---
+<div class="le-row">
+  <span class="le-icon" data-icon>{info ? <Icon icon={info.icon} badge={info.badge} /> : '·'}</span>
+  <div class="le-fields">
+    <input type="url" inputmode="url" placeholder="https://…" value={l.url} data-f="url" aria-label="URL del enlace" />
+    <input type="text" placeholder={labelPlaceholder} value={l.label} maxlength="120" data-f="label" aria-label="Nombre del enlace" />
+    <select data-f="icon" aria-label="Ícono del enlace">
+      <option value="">Ícono: automático</option>
+      {ICON_CHOICES.map((c) => <option value={c.key} selected={c.key === l.icon}>{c.name}</option>)}
+    </select>
+    {allowEmbed && (
+      <label class="check le-embed" data-embed-wrap hidden={!embed}>
+        <input type="checkbox" data-f="embed" checked={!!l.embed} />
+        <span data-embed-text>Mostrar incrustado (reproductor de {embed?.name || ''})</span>
+      </label>
+    )}
+  </div>
+  <div class="le-actions">
+    <button type="button" data-move="-1" aria-label="Subir">↑</button>
+    <button type="button" data-move="1" aria-label="Bajar">↓</button>
+    <button type="button" data-remove aria-label="Quitar">✕</button>
+  </div>
+</div>

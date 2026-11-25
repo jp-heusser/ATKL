@@ -1,0 +1,27 @@
+---
+import Panel from '../../../layouts/Panel.astro';
+import ArtistForm from '../../../components/panel/ArtistForm.astro';
+import { guard, pendingCount } from '../../../../server/panel.js';
+import Artist from '../../../../server/models/Artist.js';
+import User from '../../../../server/models/User.js';
+import { linksWithLegacy, plainLinks } from '../../../../server/util.js';
+const deny = guard(Astro, ['admin']);
+if (deny) return deny;
+const a = await Artist.findOne({ slug: String(Astro.params.slug).toLowerCase() }).lean();
+if (!a) return Astro.redirect('/panel/artistas');
+const [acc, pending] = await Promise.all([User.findOne({ artist: a._id }).select('email').lean(), pendingCount()]);
+const artist = { ...a, socials: plainLinks(a.socials), links: linksWithLegacy(a) };
+---
+<Panel title={a.name} heading={a.name} subtitle={`/${a.slug}`} active="artistas" pending={pending}>
+  <a class="form-hint" href="/panel/artistas">← Todos los artistas</a>
+  <ArtistForm artist={artist} apiUrl={`/api/admin/artists/${a.slug}`} photoUrl={`/api/admin/artists/${a.slug}/photo`} admin />
+  <form class="card form" data-api="/api/admin/accounts" data-then="account">
+    <span class="form-label">Cuenta de acceso de {a.name}</span>
+    <p class="form-hint">{acc ? `Cuenta actual: ${acc.email}. Crear otra vez reinicia su contraseña.` : 'Aún no tiene cuenta.'}</p>
+    <input type="hidden" name="slug" value={a.slug} />
+    <label>Correo del artista<input type="email" name="email" required value={acc?.email || ''} /></label>
+    <p class="msg" data-status hidden></p>
+    <button type="submit" class="btn-primary">Crear cuenta / reiniciar contraseña</button>
+    <p class="msg msg-ok" data-result hidden></p>
+  </form>
+</Panel>

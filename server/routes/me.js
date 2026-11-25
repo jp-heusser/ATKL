@@ -1,5 +1,5 @@
 /* Lo que un artista puede hacer con su propio perfil. */
-import { Router } from 'express';
+import { Router } from '../router.js';
 import Artist from '../models/Artist.js';
 import { requireAuth } from '../auth.js';
 import { assign, cleanLinks, cleanSocials, plainLinks, linksWithLegacy } from '../util.js';

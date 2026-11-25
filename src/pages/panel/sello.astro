@@ -1,0 +1,22 @@
+---
+import Panel from '../../layouts/Panel.astro';
+import LinksEditor from '../../components/panel/LinksEditor.astro';
+import { guard, pendingCount } from '../../../server/panel.js';
+import Label from '../../../server/models/Label.js';
+const deny = guard(Astro, ['admin']);
+if (deny) return deny;
+const l = (await Label.findOne({ key: 'main' }).lean()) || { name: 'ATKL Records', bio: '', socials: [], links: [] };
+const pending = await pendingCount();
+---
+<Panel title="Sello" heading="Administración" active="sello" pending={pending}>
+  <form class="card form" data-api="/api/admin/label" data-method="PUT">
+    <label>Nombre<input name="name" required maxlength="80" value={l.name} /></label>
+    <label>Descripción<textarea name="bio" rows="2" maxlength="300">{l.bio}</textarea></label>
+    <span class="form-label">Íconos de redes</span>
+    <LinksEditor name="socials" links={l.socials || []} allowEmbed={false} />
+    <span class="form-label">Botones (en orden; sin URL no se muestran)</span>
+    <LinksEditor name="links" links={l.links || []} labelPlaceholder="Título del botón" />
+    <p class="msg" data-status hidden></p>
+    <button type="submit" class="btn-primary">Guardar sello</button>
+  </form>
+</Panel>

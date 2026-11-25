@@ -1,5 +1,5 @@
 /* Administración de eventos, tipos de entrada, pedidos y personal de puerta. Solo admin. */
-import { Router } from 'express';
+import { Router } from '../router.js';
 import Event from '../models/Event.js';
 import TicketType from '../models/TicketType.js';
 import Order from '../models/Order.js';

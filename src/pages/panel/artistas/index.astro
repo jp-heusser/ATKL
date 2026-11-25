@@ -1,0 +1,42 @@
+---
+import Panel from '../../../layouts/Panel.astro';
+import Avatar from '../../../components/Avatar.astro';
+import { guard, pendingCount } from '../../../../server/panel.js';
+import Artist from '../../../../server/models/Artist.js';
+import User from '../../../../server/models/User.js';
+const deny = guard(Astro, ['admin']);
+if (deny) return deny;
+const [artists, users, pending] = await Promise.all([
+  Artist.find().sort({ order: 1, name: 1 }).lean(),
+  User.find({ artist: { $ne: null } }).select('email artist').lean(),
+  pendingCount(),
+]);
+const account = new Map(users.map((u) => [String(u.artist), u.email]));
+---
+<Panel title="Artistas" heading="Administración" active="artistas" pending={pending}>
+  <section class="card">
+    <ul class="artist-list">
+      {artists.map((a) => (
+        <li>
+          <a class="artist-row" href={`/panel/artistas/${a.slug}`}>
+            <Avatar artist={a} size={40} />
+            <span class="artist-text">
+              <span class="artist-name">{a.name}{a.active === false && <small class="muted"> (oculto)</small>}</span>
+              <span class="artist-meta">{account.get(String(a._id)) || 'Sin cuenta de acceso'}</span>
+            </span>
+            <span class="row-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+  <form class="card form" data-api="/api/admin/artists" data-then="redirect:/panel/artistas/{id}">
+    <span class="form-label">Nuevo artista</span>
+    <div class="form-2">
+      <label>Nombre<input name="name" required /></label>
+      <label>Slug (su link)<input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="nombre-artista" /></label>
+    </div>
+    <p class="msg" data-status hidden></p>
+    <button type="submit" class="btn-primary">Crear artista</button>
+  </form>
+</Panel>

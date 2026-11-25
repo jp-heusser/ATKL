@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import { Router } from '../router.js';
+import rateLimit from '../router.js';
 import User from '../models/User.js';
-import { checkPassword, hashPassword, signToken, publicUser, requireAuth, MIN_PASSWORD } from '../auth.js';
+import { checkPassword, hashPassword, signToken, publicUser, requireAuth, MIN_PASSWORD, SESSION_COOKIE, sessionCookie } from '../auth.js';
 
 const router = Router();
 
@@ -22,7 +22,15 @@ router.post('/login', loginLimiter, async (req, res) => {
   if (!ok) return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
   user.lastLoginAt = new Date();
   await user.save();
-  res.json({ token: signToken(user), user: publicUser(user) });
+  const token = signToken(user);
+  // Cookie httpOnly para la web; el token también se devuelve para scripts y pruebas.
+  res.cookie(SESSION_COOKIE, token, sessionCookie(req.headers['x-forwarded-proto'] === 'https' || !/^(localhost|127\.0\.0\.1)(:|$)/.test(req.headers.host || '')));
+  res.json({ token, user: publicUser(user) });
+});
+
+router.post('/logout', (_req, res) => {
+  res.cookie(SESSION_COOKIE, null);
+  res.json({ ok: true });
 });
 
 router.get('/me', requireAuth, (req, res) => res.json({ user: publicUser(req.user) }));

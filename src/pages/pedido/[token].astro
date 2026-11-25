@@ -1,0 +1,89 @@
+---
+/* Link privado del comprador: estado del pedido y, si está aprobado, sus entradas con QR. */
+import QRCode from 'qrcode';
+import Base from '../../layouts/Base.astro';
+import EventMedia from '../../components/EventMedia.astro';
+import { safe } from '../../../server/pages.js';
+import { getOrderView } from '../../../server/routes/tickets.js';
+import { clp, fullDate, shortDateTime, STATUS } from '../../lib/format.js';
+import { photoUrl } from '../../lib/media.js';
+
+const o = await safe(() => getOrderView(Astro.params.token));
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('Referrer-Policy', 'no-referrer'); // el link es privado: no se envía a otros sitios
+if (!o) return Astro.rewrite('/404');
+
+const st = STATUS[o.status];
+// QR generados en el servidor (SVG), sin librerías en el navegador.
+const qrs = await Promise.all(
+  o.tickets.map((t) =>
+    t.status === 'valid' ? QRCode.toString(t.code, { type: 'svg', margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#ffffff' } }) : null,
+  ),
+);
+const where = o.event ? [o.event.venue, o.event.address, o.event.city].filter(Boolean).join(' · ') : '';
+---
+<Base title={`Pedido ${o.code} · ATKL Records`} noindex>
+  <main class="page">
+    <nav class="back"><a href="/">← ATKL Records</a></nav>
+    {o.event?.image && <div class="order-media"><EventMedia src={photoUrl(o.event.image)} variant="card" /></div>}
+
+    <header class="event-head">
+      <span class:list={['status-badge', st.cls]}>{st.label}</span>
+      <h1 class="artist-title">{o.event?.title}</h1>
+      {o.event && <p class="event-when">{fullDate(o.event.startsAt)}</p>}
+      {where && <p class="artist-meta">{where}</p>}
+    </header>
+
+    <section class="card order-sum">
+      <div><small>Pedido</small><strong class="mono">{o.code}</strong></div>
+      <div><small>Entradas</small><strong>{o.quantity} × {o.typeName}</strong></div>
+      <div><small>Total</small><strong>{clp(o.total)}</strong></div>
+      <div><small>A nombre de</small><strong>{o.buyer.name}</strong></div>
+    </section>
+
+    {o.status === 'pending' && (
+      <section class="card form">
+        <p>Recibimos tu pedido y el comprobante. <strong>Estamos revisando la transferencia</strong>; cuando la validemos, tus entradas con código QR aparecerán en esta misma página.</p>
+        <p class="msg msg-warn"><strong>Guarda este link</strong>: es la única forma de ver tus entradas. No compartas este link: quien lo tenga puede usarlas.</p>
+        <button type="button" class="btn-primary" data-copy="url" data-done="Link copiado ✓">Copiar link de mi pedido</button>
+        <p class="form-hint">Pedido enviado el {shortDateTime(o.createdAt)}. Esta página se actualiza sola.</p>
+      </section>
+      <script is:inline>
+        // Mientras está en revisión, se recarga cada 30 s.
+        setTimeout(function () { if (!document.hidden) location.reload(); else document.addEventListener('visibilitychange', function () { location.reload(); }, { once: true }); }, 30000);
+      </script>
+    )}
+
+    {o.status === 'approved' && (
+      <>
+        <p class="form-hint center">Muestra cada QR en la entrada. Puedes hacer una captura de pantalla. Cada QR sirve una sola vez.</p>
+        <div class="tickets">
+          {o.tickets.map((t, i) => (
+            <article class:list={['ticket', `ticket-${t.status}`]}>
+              <header><span>{o.event?.title}</span><span>{i + 1}/{o.tickets.length}</span></header>
+              {qrs[i] ? (
+                <div class="qr" style="width:220px;height:220px" role="img" aria-label="Código QR de la entrada" set:html={qrs[i]} />
+              ) : (
+                <div class="qr qr-off" style="width:220px;height:220px">{t.status === 'used' ? 'USADA' : 'ANULADA'}</div>
+              )}
+              <footer>
+                <strong>{t.typeName}</strong>
+                <span>{t.holder}</span>
+                <span class="mono">{o.code} · {t.code.slice(0, 6).toUpperCase()}</span>
+              </footer>
+            </article>
+          ))}
+        </div>
+        <button type="button" class="copy-btn" data-copy="url" data-done="Link copiado ✓">Copiar link de mi pedido</button>
+      </>
+    )}
+
+    {(o.status === 'rejected' || o.status === 'cancelled') && (
+      <section class="card form">
+        <p class="msg msg-error">{o.note}</p>
+        <p>Si crees que es un error, escríbenos por Instagram indicando tu código de pedido <strong class="mono">{o.code}</strong>.</p>
+        <a class="btn-primary center" href="https://www.instagram.com/atkl.records/" target="_blank" rel="noopener noreferrer">Escribir a ATKL</a>
+      </section>
+    )}
+  </main>
+</Base>
