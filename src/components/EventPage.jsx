@@ -6,6 +6,7 @@ import { clp, fullDate, compressImage } from '../format.js';
 import { rememberOrder } from './OrderPage.jsx';
 import { photoUrl } from './Avatar.jsx';
 import Lightbox from './Lightbox.jsx';
+import EventMedia from './EventMedia.jsx';
 
 function CopyValue({ label, value }) {
   const [done, setDone] = useState(false);
@@ -111,7 +112,7 @@ export default function EventPage({ slug }) {
         <p className="artist-meta">{[event.venue, event.address, event.city].filter(Boolean).join(' · ')}</p>
         {event.image && (
           <button type="button" className="ev-hero-btn" onClick={() => setZoom(true)} aria-label="Ver imagen en grande">
-            <img className="ev-hero ev-hero-in" src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} width="1600" height="900" />
+            <EventMedia src={photoUrl(event.image)} alt={`Imagen de ${event.title}`} variant="hero" />
             <span className="ev-zoom-hint" aria-hidden="true">⤢</span>
           </button>
         )}

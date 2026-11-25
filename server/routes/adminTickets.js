@@ -86,11 +86,11 @@ router.put('/events/:id', async (req, res) => {
   res.json({ ok: true });
 });
 
-// Imagen 16:9 del evento: { image: "data:image/jpeg;base64,…" } (la web la recorta antes de subirla).
+// Imagen del evento: { image: "data:image/jpeg;base64,…" } (original, sin recortar; máx. 1,5 MB).
 router.put('/events/:id/image', async (req, res) => {
   const ev = await Event.findById(req.params.id);
   if (!ev) return res.status(404).json({ error: 'Evento no encontrado' });
-  await saveEventImage(ev, req.body?.image, req.body?.full);
+  await saveEventImage(ev, req.body?.image);
   await ev.save();
   res.json({ image: ev.image, imageFull: ev.imageFull });
 });

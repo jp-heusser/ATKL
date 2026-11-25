@@ -2,10 +2,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, apiBlobUrl } from '../api.js';
 import { link } from '../router.js';
-import { clp, shortDateTime, toLocalInput, STATUS, eventImage16x9, compressImage } from '../format.js';
+import { clp, shortDateTime, toLocalInput, STATUS, compressImage } from '../format.js';
+import EventMedia from './EventMedia.jsx';
 
-// Versión 16:9 para mostrar + original sin recortar (máx. 1600 px) para la vista ampliada.
-const prepareEventImage = async (file) => ({ image: await eventImage16x9(file), full: await compressImage(file, 1600, 0.85) });
+// La imagen se guarda tal cual (solo se reduce a 2000 px como máximo). El encuadre lo hace el CSS.
+const prepareEventImage = async (file) => ({ image: await compressImage(file, 2000, 0.86) });
 import { photoUrl } from './Avatar.jsx';
 import { useSaver, Status } from './ui.jsx';
 
@@ -155,7 +156,7 @@ export function AdminOrders({ onChanged }) {
    ========================================================= */
 const blankEvent = { title: '', slug: '', startsAt: '', venue: '', address: '', city: '', description: '', status: 'draft', ticketUrl: '' };
 
-const IMAGE_HINT = 'Se guarda en 16:9. Un flyer vertical (reel 9:16) se muestra entero, con los costados rellenos por una versión borrosa.';
+const IMAGE_HINT = 'Se guarda sin recortar. Horizontal (ideal 16:9) o vertical tipo reel (9:16): siempre se muestra completa.';
 
 // Imagen 16:9 del evento (evento ya creado): se procesa en el navegador y se guarda al instante.
 function EventImageField({ ev, onChanged }) {
@@ -180,10 +181,10 @@ function EventImageField({ ev, onChanged }) {
     }, 'Imagen quitada ✓');
   return (
     <div className="form">
-      <span className="form-label">Imagen (16:9)</span>
+      <span className="form-label">Imagen del evento</span>
       <label className="file-drop ev-img-drop">
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} disabled={s.busy} />
-        {img ? <img src={photoUrl(img)} alt="Imagen del evento" /> : <span>{s.busy ? 'Subiendo…' : 'Elegir imagen'}</span>}
+        {img ? <EventMedia src={photoUrl(img)} alt="Imagen del evento" /> : <span>{s.busy ? 'Subiendo…' : 'Elegir imagen'}</span>}
       </label>
       <p className="form-hint">{IMAGE_HINT} {img && <button type="button" className="btn-link" onClick={remove}>Quitar imagen</button>}</p>
       <Status s={s} />
@@ -233,10 +234,10 @@ function EventForm({ ev, onSaved }) {
       <span className="form-label">{ev ? 'Datos del evento' : 'Nuevo evento'}</span>
       {!ev && (
         <>
-          <span className="form-label">Imagen (16:9)</span>
+          <span className="form-label">Imagen del evento</span>
           <label className="file-drop ev-img-drop">
             <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pickImage} />
-            {image ? <img src={image.image} alt="Imagen del evento" /> : <span>Elegir imagen (opcional)</span>}
+            {image ? <EventMedia src={image.image} alt="Imagen del evento" /> : <span>Elegir imagen (opcional)</span>}
           </label>
           <p className="form-hint">{IMAGE_HINT} {image && <button type="button" className="btn-link" onClick={() => setImage(null)}>Quitar</button>}</p>
           {imgErr && <p className="msg msg-error">{imgErr}</p>}

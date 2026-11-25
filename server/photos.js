@@ -39,7 +39,7 @@ export async function removePhoto(artist) {
 const EVENT_MAX = 1.5 * 1024 * 1024;
 
 // Guarda la imagen del evento (dataURL o Buffer ya validado) y deja sus direcciones en el evento.
-// full (opcional): la original sin recortar, para la vista ampliada.
+// full: solo lo usaban versiones anteriores (imagen 16:9 + original); hoy se guarda una sola, la original.
 export async function saveEventImage(ev, input, full) {
   const { type, buffer } = typeof input === 'string' ? parseImage(input, EVENT_MAX) : input;
   const f = full ? parseImage(full, EVENT_MAX) : null;

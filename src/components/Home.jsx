@@ -5,6 +5,7 @@ import SocialIcons from './SocialIcons.jsx';
 import Avatar from './Avatar.jsx';
 import { dayMonth } from '../format.js';
 import { photoUrl } from './Avatar.jsx';
+import EventMedia from './EventMedia.jsx';
 
 const LOGO = `${import.meta.env.BASE_URL}logo-atkl.webp`;
 
@@ -30,7 +31,7 @@ export default function Home({ label, artists, events = [] }) {
             const d = dayMonth(e.startsAt);
             return (
               <a key={e.slug} className={`event-card rise${e.image ? ' has-img' : ''}`} href={link(`evento/${e.slug}`)}>
-                {e.image && <img className="ev-img" src={photoUrl(e.image)} alt="" loading="lazy" width="1600" height="900" />}
+                {e.image && <EventMedia src={photoUrl(e.image)} variant="card" lazy />}
                 <span className="ev-row">
                 <span className="ev-date"><strong>{d.day}</strong><small>{d.month}</small></span>
                 <span className="ev-text">

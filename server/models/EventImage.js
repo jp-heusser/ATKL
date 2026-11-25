@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
-/* Imagen de un evento, guardada en la base. Una por evento:
-   - data: versión 16:9 que se muestra en la página y en las tarjetas.
-   - fullData: la original sin recortar, para la vista ampliada. */
+/* Imagen de un evento, guardada en la base. Una por evento.
+   - data: la imagen original, sin recortar (el encuadre y el fondo difuminado los hace el CSS).
+   - fullData: solo en imágenes subidas con una versión anterior (original aparte). */
 const eventImageSchema = new mongoose.Schema(
   {
     event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true, unique: true },

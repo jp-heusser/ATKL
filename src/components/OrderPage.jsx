@@ -5,6 +5,7 @@ import { link, absoluteLink } from '../router.js';
 import { clp, fullDate, shortDateTime, STATUS } from '../format.js';
 import Qr from './Qr.jsx';
 import { photoUrl } from './Avatar.jsx';
+import EventMedia from './EventMedia.jsx';
 
 // Guarda los pedidos en este navegador para encontrarlos después.
 const KEY = 'atkl_orders';
@@ -58,7 +59,7 @@ export default function OrderPage({ token }) {
     <main className="page">
       <nav className="back"><a href={link('')}>← ATKL Records</a></nav>
 
-      {o.event?.image && <img className="ev-hero" src={photoUrl(o.event.image)} alt="" width="1600" height="900" />}
+      {o.event?.image && <div className="order-media"><EventMedia src={photoUrl(o.event.image)} variant="card" /></div>}
       <header className="event-head">
         <span className={`status-badge ${st.cls}`}>{st.label}</span>
         <h1 className="artist-title">{o.event?.title}</h1>
